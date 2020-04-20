@@ -62,7 +62,7 @@ public class ImportScene {
     Label date = new Label("Date");
     TextField weightField = new TextField();
     Label weight = new Label("Weight"); 
-    // 
+    
     
     // adds labels and text boxes to the vbox
     vbox.getChildren().addAll(farm, farmField, date, dateField, weight, weightField, b2, b3, b1);
