@@ -1,3 +1,10 @@
+/**
+ * Assignment Name:   MilkWeight
+ * Filename:          Main.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
 import javafx.application.Application;

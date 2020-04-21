@@ -1,17 +1,20 @@
+/**
+ * Assignment Name:   MilkWeight
+ * Filename:          ReportScene.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.chart.*;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 /**
  * The scene that occurs when a report is created from the import scene
@@ -23,78 +26,73 @@ public class ReportScene {
   // Main Pane containing the scene's content
   private static BorderPane root;
 
-  private class TableData {
-    SimpleStringProperty IDtype;
-    SimpleStringProperty total;
-    SimpleStringProperty percentofweight;
-
-    private TableData(String IDtype, String total, String percentofweight) {
-      this.IDtype = new SimpleStringProperty(IDtype);
-      this.total = new SimpleStringProperty(total);
-      this.percentofweight = new SimpleStringProperty(percentofweight);
-    }
-  }
-
   /**
    * Generates the elements for the report scene
    */
   private static void createScene() {
+
+    /*
+     * Initialization (Creating the Scene Base)
+     */
+
     // Create an BorderPane as the root of the scene
     root = new BorderPane();
 
-    // Add a button to the root
-    Button b = new Button("Go to Import Scene");
-    root.setBottom(b);
-    b.setOnAction(e -> {
+    /*
+     * BorderPane Left (Displaying Report Text and New Report)
+     */
+
+    // Create an VBox to store the Text and Return Button
+    VBox vbox = new VBox();
+    vbox.setSpacing(10);
+    vbox.setAlignment(Pos.CENTER);
+
+    // Create new Report Button
+    Button newReportButton = new Button("Create New Report");
+    newReportButton.setOnAction(e -> {
       Main.setStage("Import");
     });
-    FarmReport f = new FarmReport("annual");
-    int[] data = f.getTotal();
 
-    int[] percentages = determinePercentages(data);
-    String typeOfID = "Month";
+    // Display A Text Box with Report Data
+    Text resultText = new Text();
 
-    // Display Type of Report at Top of screen
-    String report = new String("Farm Report");
-    Label l = new Label(report);
-    root.setTop(l);
+    // START OF TEMPORARY EXAMPLE DATA CODE
+    resultText.setText("Farm ID: farm01\n" + "Year: 2019\n\n" + "Monthly Milk Weights:\n" + "Month 1: 100\n"
+        + "Month 2: 200\n" + "Month 3: 300\n" + "Month 4: 400\n" + "Month 5: 500\n" + "Month 6: 600\n"
+        + "Month 7: 700\n" + "Month 8: 800\n" + "Month 9: 900\n" + "Month 10: 1,000\n" + "Month 11: 1,100\n"
+        + "Month 12: 1,200\n\n" + "Total Weight: 7,800");
+    // END OF TEMPORARY EXAMPLE DATA CODE
 
-    // Display Table on Right side of screen
-    // General Format: Month/Farm ID, Total Weight, Percent of Total Weight
-    TableView table = new TableView();
-    table.setEditable(true);
-    TableColumn id = new TableColumn(typeOfID);
-    id.setCellValueFactory(new PropertyValueFactory<>("IDtype"));
-    TableColumn totalWeight = new TableColumn("Total Weight");
-    totalWeight.setCellValueFactory(new PropertyValueFactory<>("total"));
-    TableColumn percentOfWeight = new TableColumn("Percent of Total Weight");
-    percentOfWeight.setCellValueFactory(new PropertyValueFactory<>("percentofweight"));
-    ReportScene r = new ReportScene();
-    ObservableList<TableData> tdata = FXCollections.observableArrayList();
-    for (int i = 0; i < data.length; i++) {
-      String IDtype = Integer.toString(i);
-      String total = Integer.toString(data[i]);
-      String percentofweight = Integer.toString(percentages[i]);
-      TableData t = r.new TableData(IDtype, total, percentofweight);
-      tdata.add(t);
+    // Add the elements to the VBox
+    vbox.getChildren().setAll(resultText, newReportButton);
+
+    // Set the VBox to the Left
+    root.setLeft(vbox);
+
+    /*
+     * BorderPane Center (Pie Graph)
+     */
+
+    // Create the Pie Chart
+    PieChart pieChart = new PieChart();
+
+    // Declare the Type of Report
+    String reportType;
+
+    // START OF TEMPORARY EXAMPLE DATA CODE
+    reportType = "Farm";
+    for (int i = 1; i <= 12; i++) {
+      PieChart.Data slice = new PieChart.Data("Month " + i, i * 100);
+
+      pieChart.getData().add(slice);
     }
-    table.setItems(tdata);
-    table.getColumns().addAll(id, totalWeight, percentOfWeight);
-    root.setLeft(table);
+    // END OF TEMPORARY EXAMPLE DATA CODE
+
+    // Set the title of the Pie Chart as the Report Type
+    pieChart.setTitle(reportType + " Report");
 
     // Display Pie Chart in Center
-    PieChart p = new PieChart();
-    // add data to piechart
-    for (int i = 0; i < percentages.length; i++) {
-      PieChart.Data slice = new PieChart.Data("Month " + Integer.toString(i), percentages[i]);
-      p.getData().add(slice);
-    }
-    ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-    p.setTitle(report);
-    root.setCenter(p);
-
-    // Display Min, Max, Average on Right side
-
+    root.setCenter(pieChart);
   }
 
   /**
@@ -105,49 +103,5 @@ public class ReportScene {
     stage.setTitle(title);
     stage.setScene(new Scene(root, width, height));
     stage.show();
-  }
-
-  public static int[] determinePercentages(int[] month) {
-    int percent[] = new int[month.length];
-    int total = 0;
-    int percentage = 0;
-    for (int i = 0; i < month.length; i++) {
-      total = total + month[i];
-    }
-
-    for (int j = 0; j < month.length; j++) {
-      percentage = (int) ((((double) month[j] / (double) total)) * 100);
-      percent[j] = percentage;
-    }
-    return percent;
-  }
-
-  public static int getMin(int[] month) {
-    int min = month[0];
-    for (int i = 0; i < month.length; i++) {
-      if (min > month[i]) {
-        min = month[i];
-      }
-    }
-    return min;
-  }
-
-  public static int getMax(int[] month) {
-    int max = month[0];
-    for (int i = 0; i < month.length; i++) {
-      if (max < month[i]) {
-        max = month[i];
-      }
-    }
-    return max;
-  }
-
-  public static int getAverage(int[] month) {
-    int total = 0;
-    for (int i = 0; i < month.length; i++) {
-      total = total + month[i];
-    }
-    int average = (total / month.length);
-    return average;
   }
 }
