@@ -50,7 +50,9 @@ public class ImportScene {
     BorderPane.setAlignment(b2, Pos.BOTTOM_RIGHT);
     BorderPane.setAlignment(b3, Pos.BOTTOM_RIGHT);
 
-    
+    ComboBox<Object> comboBox = new ComboBox<Object>();
+    comboBox.getItems().add("");
+    comboBox.setPromptText("Report Type");
     
     
     VBox vbox = new VBox();
@@ -68,27 +70,28 @@ public class ImportScene {
     
     
     // adds labels and text boxes to the vbox
-    vbox.getChildren().addAll(farm, farmField, date, dateField, weight, weightField, b2, b3, b1);
+    vbox.getChildren().addAll(farm, farmField, date, dateField, weight, weightField, b2, b3, b1, comboBox);
     root.setRight(vbox); // sets the vbox to the right pane
-    
-    ComboBox comboBox = new ComboBox();
-    comboBox.setPromptText("Report Type");
-    BorderPane.setAlignment(comboBox, Pos.BOTTOM_RIGHT);
     
     
     Label farm1 = new Label("Farm");
     Label date1 = new Label("Date");
     Label weight1 = new Label("Weight");
-    HBox hBox = new HBox();
-    hBox.setSpacing(580);
-    hBox.getChildren().addAll(farm1, date1, weight1);
-    root.setTop(hBox);
+    
+    GridPane gridPane = new GridPane();
+    gridPane.add(farm1, 0, 0);
+    gridPane.add(date1, 1, 0);
+    gridPane.add(weight1, 2, 0);
+    
+    gridPane.setHgap(300);
+    gridPane.setVgap(20);
+    root.setCenter(gridPane);
+    
     
      
     // STILL NEEDS
     // 1. Add table object to center of border pane
     // 2. Add Hbox to top pane with "Farm, Date, Weight"
-    // 3. Add "report type" drop down 
 
  
     // sets the action of button b to take user from ImportScene 
