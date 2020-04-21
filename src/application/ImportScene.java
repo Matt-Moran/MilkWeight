@@ -3,9 +3,12 @@ package application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -51,7 +54,7 @@ public class ImportScene {
     
     
     VBox vbox = new VBox();
-    vbox.setSpacing(20);
+    vbox.setSpacing(30);
     root.setRight(vbox); // creates a new Vbox
 
     // adds labels and text boxes so user can enter in values for
@@ -68,7 +71,20 @@ public class ImportScene {
     vbox.getChildren().addAll(farm, farmField, date, dateField, weight, weightField, b2, b3, b1);
     root.setRight(vbox); // sets the vbox to the right pane
     
+    ComboBox comboBox = new ComboBox();
+    comboBox.setPromptText("Report Type");
+    BorderPane.setAlignment(comboBox, Pos.BOTTOM_RIGHT);
     
+    
+    Label farm1 = new Label("Farm");
+    Label date1 = new Label("Date");
+    Label weight1 = new Label("Weight");
+    HBox hBox = new HBox();
+    hBox.setSpacing(580);
+    hBox.getChildren().addAll(farm1, date1, weight1);
+    root.setTop(hBox);
+    
+     
     // STILL NEEDS
     // 1. Add table object to center of border pane
     // 2. Add Hbox to top pane with "Farm, Date, Weight"
