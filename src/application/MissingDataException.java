@@ -1,5 +1,8 @@
 package application;
 
-public class MissingDataException {
-
+@SuppressWarnings("serial")
+public class MissingDataException extends Exception {
+  public MissingDataException(String errorMessage) {
+    super(errorMessage);
+  }
 }

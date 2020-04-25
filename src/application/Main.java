@@ -7,6 +7,8 @@
 
 package application;
 
+import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -17,12 +19,13 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
 
-  // Variables
+  // Global Variables
   private static final int WINDOW_WIDTH = 1280;
   private static final int WINDOW_HEIGHT = 720;
   private static final String APP_TITLE = "MilkWeight";
   private static Stage STAGE;
-
+  public static ArrayList<Farm> farms = new ArrayList<Farm>();
+  
   /**
    * Starts the application GUI and manages application data
    */
