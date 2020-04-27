@@ -1,21 +1,26 @@
 package application;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Hashtable;
 
+/**
+ * 
+ * @author ATEAM050
+ */
 public class Farm implements FarmADT {
-	
-	//HashTable storing the date/weight pairs
-	private Hashtable<Date, Integer> farmTable;
-	
-	//The id associated with the farm
-	private String id;
-	
+
+  // HashTable storing the date/weight pairs
+  private Hashtable<LocalDate, Integer> farmTable;
+
+  // The id associated with the farm
+  private String id;
+
   public Farm(String id) {
-	  farmTable = new Hashtable<Date, Integer>();
-	  this.id = id;
+    // Initialize the farm with a string ID and a LocalDate (date) and Integer (weight) hash map
+    farmTable = new Hashtable<LocalDate, Integer>();
+    this.id = id;
   }
-	
+
   /**
    * Receives the data structures unique ID
    * 
@@ -32,11 +37,11 @@ public class Farm implements FarmADT {
    * @param date   for the weight
    * @param weight for the date
    */
-  public void insert(Date date, int weight) {
-	  if (contains(date))
-		  farmTable.replace(date, weight);
-	  else
-		  farmTable.put(date, weight);
+  public void insert(LocalDate date, int weight) {
+    if (contains(date))
+      farmTable.replace(date, weight);
+    else
+      farmTable.put(date, weight);
   }
 
   /**
@@ -45,10 +50,10 @@ public class Farm implements FarmADT {
    * @param Date date remove the date/weight pair from the data structure
    * @return true if the pair was removed, false if it didn't exist (not removed)
    */
-  public boolean remove(Date date) {
+  public boolean remove(LocalDate date) {
     if (contains(date)) {
-    	farmTable.remove(date);
-    	return true;
+      farmTable.remove(date);
+      return true;
     }
     return false;
   }
@@ -68,9 +73,9 @@ public class Farm implements FarmADT {
    * @param Date date being checked
    * @return if the date exists in the data structure
    */
-  public boolean contains(Date date) {
-	if (date == null)
-		return false;
+  public boolean contains(LocalDate date) {
+    if (date == null)
+      return false;
     return farmTable.containsKey(date);
   }
 
@@ -81,44 +86,39 @@ public class Farm implements FarmADT {
    * @return the weight for a specific date, if the date doesn't exist, return 0
    * @throws InvalidDateException if the date is null
    */
-  public int get(Date date) throws InvalidDateException {
-	if (date == null)
-		throw new InvalidDateException("Date is null");
+  public int get(LocalDate date) throws InvalidDateException {
+    if (date == null)
+      throw new InvalidDateException("Date is null");
+    // If there is a date, get its integer value and return it, if not, return 0
     if (contains(date))
-    	return farmTable.get(date);
+      return farmTable.get(date);
     return 0;
   }
 
   /**
-   * Returns the total weight for a range of dates
+   * Returns the total weight for a range of dates (both start and end are
+   * inclusive)
    * 
    * @param startDate the start of the date range
    * @param endDate   the end of the date range
    * @return the total weight for the date range, skipping dates that don't exist
-   * @throws InvalidDateException if the start and/or end date is null
+   * @throws InvalidDateException if the start and/or end date is null or the
+   *                              order is incorrect
    */
-  @SuppressWarnings("deprecation")
-  public int get(Date startDate, Date endDate) throws InvalidDateException {
-	if (startDate == null)
-		throw new InvalidDateException("Start date is null");
-	if (endDate == null)
-		throw new InvalidDateException("End date is null");
-    //If the start date is after the end date, switch the start and end dates to compute
-    if (startDate.after(endDate)) {
-    	Date temp = startDate;
-    	startDate = endDate;
-    	endDate = temp;
-    }
+  public int get(LocalDate startDate, LocalDate endDate) throws InvalidDateException {
+    // Check if both dates are valid dates
+    if (startDate == null)
+      throw new InvalidDateException("Start date is null");
+    else if (endDate == null)
+      throw new InvalidDateException("End date is null");
+    else if (startDate.isAfter(endDate))
+      throw new InvalidDateException("The start date is after the end date");
+    // Total the weights for each date in the range
     int totalWeight = 0;
-    Date date = new Date(startDate.getYear(), startDate.getMonth(), startDate.getDay());
-    while(date != nextDay(endDate)) {
-      totalWeight += farmTable.get(date);
-      date = nextDay(date);
-    }
-    return totalWeight;	
+    for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1))
+      totalWeight += get(date);
+    return totalWeight;
   }
-  
-  
 
   /**
    * Find the total weight for a specific month and year
@@ -126,19 +126,19 @@ public class Farm implements FarmADT {
    * @param month the month
    * @param year  the year
    * @return the total weight for the month and year pair
-   * @throws InvalidDateException if the month is outside the range of 1-12 or if the year is negative
+   * @throws InvalidDateException if the month is outside the range of 1-12 or if
+   *                              the year is negative
    */
-  @SuppressWarnings("deprecation")
   public int get(int month, int year) throws InvalidDateException {
-    //In date class it says the month is between 1-12
+    // Check that the year is above 0 and the month is between 1-12
     if (month < 1 || month > 12)
-    	throw new InvalidDateException("Month is outside the range of 1 - 12");
+      throw new InvalidDateException("Month is outside the range of 1 - 12");
     else if (year < 0)
-    	throw new InvalidDateException("Year is negative value");
-    int totalWeight = 0;
-    for (int i = 1; i <= 31; i++)
-    	totalWeight += farmTable.get(new Date(year, month, i));
-    return totalWeight;
+      throw new InvalidDateException("Year is negative value");
+    // Return a date range, with the range of the month/year
+    LocalDate s = LocalDate.of(year, month, 1);
+    LocalDate e = s.withDayOfMonth(s.lengthOfMonth());
+    return get(s, e);
   }
 
   /**
@@ -148,28 +148,11 @@ public class Farm implements FarmADT {
    * @return the total weight for a year
    * @throws InvalidDateException if the year is null or negative
    */
-  @SuppressWarnings("deprecation")
   public int get(int year) throws InvalidDateException {
-	if (year < 0)
-		throw new InvalidDateException("Year is negative");
-    int totalWeight = 0;
-    for (int i = 1; i <= 12; i++)
-    	for (int j = 1; j <= 31; i++)
-    		totalWeight += farmTable.get(new Date(year, i, j));
-    return totalWeight;
-  }
-  
-  @SuppressWarnings("deprecation")
-  private Date nextDay(Date date) {
-    Date next = new Date(date.getYear(), date.getMonth(), date.getDay() + 1);
-    if(next.getDay() > 31) {
-      next.setDate(1);
-      next.setMonth(next.getMonth() + 1);
-    }
-    if (next.getMonth() > 12) {
-      next.setMonth(1);
-      next.setYear(next.getYear() + 1);
-    }
-    return next;
+    // Check that the year is above 0
+    if (year < 0)
+      throw new InvalidDateException("Year is negative");
+    // Return a date range, with the range of the year
+    return get(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
   }
 }

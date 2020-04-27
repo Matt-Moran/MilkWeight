@@ -1,6 +1,6 @@
 package application;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public interface FarmADT {
   /**
@@ -17,7 +17,7 @@ public interface FarmADT {
    * @param date   for the weight
    * @param weight for the date
    */
-  public void insert(Date date, int weight);
+  public void insert(LocalDate date, int weight);
 
   /**
    * Removed a specific date and weight pair from the data structure
@@ -25,7 +25,7 @@ public interface FarmADT {
    * @param Date date remove the date/weight pair from the data structure
    * @return true if the pair was removed, false if it didn't exist (not removed)
    */
-  public boolean remove(Date date);
+  public boolean remove(LocalDate date);
 
   /**
    * Returns the size of the data structure
@@ -40,7 +40,7 @@ public interface FarmADT {
    * @param Date date being checked
    * @return if the date exists in the data structure
    */
-  public boolean contains(Date date);
+  public boolean contains(LocalDate date);
 
   /**
    * Returns the weight for a specific date
@@ -49,7 +49,7 @@ public interface FarmADT {
    * @return the weight for a specific date, if the date doesn't exist, return 0
    * @throws InvalidDateException if the date is null
    */
-  public int get(Date date) throws InvalidDateException;
+  public int get(LocalDate date) throws InvalidDateException;
 
   /**
    * Returns the total weight for a range of dates
@@ -59,7 +59,7 @@ public interface FarmADT {
    * @return the total weight for the date range, skipping dates that don't exist
    * @throws InvalidDateException if the start and/or end date is null
    */
-  public int get(Date startDate, Date endDate) throws InvalidDateException;
+  public int get(LocalDate startDate, LocalDate endDate) throws InvalidDateException;
 
   /**
    * Find the total weight for a specific month and year
