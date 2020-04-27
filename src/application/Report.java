@@ -1,6 +1,10 @@
 package application;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -56,13 +60,148 @@ public class Report {
    * @param year   the year for the farm
    * @throws InvalidReportException if the farm ID is null, if the farm ID doesn't
    *                                exist or if the year is null
+ * @throws InvalidDateException 
    */
-  public Report(String farmId, int year) throws InvalidReportException {
+  public Report(String farmId, int year) throws InvalidReportException, InvalidDateException {
     report = new HashMap<String, String>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
+    
+  
+    if (farmId == null) {
+    	throw new InvalidReportException("ERROR: Invalid Farm ID");
+    }
+    if (!farmExists(farmId)) {
+    	throw new InvalidReportException("ERROR: Farm ID not found");
+    }
+    if (year <= 0) {
+    	throw new InvalidReportException("ERROR: Invalid Year");
+    }
+    
+    // Adds farmId and Year to report 
+    report.put("Farm ID", farmId);
+    report.put("Year", String.valueOf(year));
+    
+    // total milkweight produced by all farms for a given year
+    int totalYearWeight = getTotalWeightOfYear(year);
+    // total milkweight produced by given farm for given year
+    int farmYearWeight = findFarm(farmId).get(year);
+    // adds the total weight produced by the farm to the report
+    report.put("Year Total", String.valueOf(farmYearWeight));
 
-    // TODO implement initialization for FARM REPORT
+    // calculates percentage of milkweight produced by one farm 
+    // compared to all farms for one year
+    double yearRatio = (farmYearWeight / totalYearWeight) * 100;
+    double yearPercentage = Math.round(yearRatio * 100.0) / 100.0;
+    
+    // adds percentage of of milkweight produced by one farm 
+    // compared to all farms for one year to report
+    report.put("Year Percentage", String.valueOf(yearPercentage));
+    
+    
+    // for each month, calculates the monthly percentage of milk
+    // weight produced by a farm compared to the total milk weight
+    // produced by all farms 
+    for (int i = 1; i <=12; i++) {
+    	
+    	int totalMonthWeight = 0;
+    	
+    	// calculates total milkweight produced by all farms 
+    	// for one month
+    	for (int j = 0; j < Main.farms.size(); j++) {
+    		int currMonthWeight = Main.farms.get(j).get(i, year);
+    		totalMonthWeight = totalMonthWeight + currMonthWeight;
+    	}
+
+    	// gets farm specified by user input
+    	Farm farm = findFarm(farmId);
+    	// gets farm weight produced by farm for the month
+    	int farmMonthWeight = farm.get(i, year);
+    	
+    	// calculates percentage of milk weight produced by one farm 
+    	// compared to all farms for a given month
+    	int ratio = (farmMonthWeight / totalMonthWeight) * 100;
+    	double percentage = Math.round(ratio * 100.0) / 100.0;
+    	
+    	// adds monthly total milk weight produced by farm to report
+    	report.put("Month " + String.valueOf(i) + " Total", String.valueOf(farmMonthWeight));
+    	// adds monthly percentage of total milkweight produced by one farm to report
+    	report.put("Month " + String.valueOf(i) + " Percentage", String.valueOf(percentage));
+    	
+    	// adds the month and weight produced by the farm for each 
+    	// month to the pieGraph
+    	Integer farmMonthWeight2 = findFarm(farmId).get(i, year);
+    	String month = "Month " + String.valueOf(i);
+    	Pair<String, Integer> pair = new Pair<String, Integer>(month, farmMonthWeight2);
+    	pieGraph.add(pair);
+
+    }
+
   }
+  
+  
+  /** Method returns the total milk weight produced by all farms for a given year
+   	* @param year
+ 	* @return
+ * @throws InvalidDateException 
+ 	*/
+  private int getTotalWeightOfYear(int year) throws InvalidDateException {
+	  int totalWeight = 0;
+	    
+	    // finds the total milk weight of all farms for a given year
+	    for (int i = 0; i < Main.farms.size(); i++) {
+	    	int currYearWeight = Main.farms.get(i).get(year);
+	    	totalWeight = totalWeight + currYearWeight;
+	    }
+	    
+	    return totalWeight;
+  }
+  
+  
+   /** Helper method to determine if a farm exists
+    * based on a given farm Id
+    * @param farmId
+ 	* @return
+ 	*/
+  private boolean farmExists(String farmId) {
+	  boolean exists = false;
+	  
+	  for (int i = 0; i < Main.farms.size(); i++) {
+
+		  String currentID = Main.farms.get(i).getID();
+		  
+		  if (farmId == currentID) {
+			  exists = true;
+			  break;
+		  }
+	  }
+	  return exists;
+
+  }
+  
+   /** Helper method that returns a farm based on a specified 
+    * farm Id
+    * @param farmId of farm 
+ 	* @return farm of farmId
+ 	*/
+  private Farm findFarm(String farmId) {
+	  
+	  if (!farmExists(farmId)) {
+		  return null;
+	  }
+	  Farm foundFarm = new Farm("");
+	  
+	  for (int i = 0; i < Main.farms.size(); i++) {
+		  
+		  if (farmId == Main.farms.get(i).getID()) {
+			  foundFarm = Main.farms.get(i);
+		  }
+		  
+	  }
+	  return foundFarm;
+	 
+  }
+  
+ 
   
   // ANNUAL REPORT
   /**
@@ -92,12 +231,85 @@ public class Report {
    * 
    * @param year   the year for the report
    * @throws InvalidReportException if the year is null
+ * @throws InvalidDateException 
    */
-  public Report(int year) throws InvalidReportException {
+  public Report(int year) throws InvalidReportException, InvalidDateException {
     report = new HashMap<String, String>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
+    
+    if (year <= 0) {
+    	throw new InvalidReportException("ERROR: That year is invalid");
+    }
+    
+    // adds year to report
+    report.put("Year", String.valueOf(year));
+    
+    // total milkweight produced by all farms in a given year
+    int yearWeight = getTotalWeightOfYear(year);
+    
+    // adds total milk weight produced by all farms 
+    // for a given year to report
+    report.put("Year Total", String.valueOf(yearWeight));
+    
 
-    // TODO implement initialization for ANNUAL REPORT
+    // loops through all farms, adding their total milkweight produced
+    // of that given year to report and piegraph,
+    // and adds percentage of milkweight produced for a farm compared to
+    // all farms for a given year to report as well
+    for (int i = 0; i < Main.farms.size(); i++) {
+    	    	
+    	// gets current farm and ID
+    	Farm currFarm = Main.farms.get(i);
+    	String ID = currFarm.getID();
+    	
+    	// gets total weight produced by the farm for the 
+    	// given year
+    	int farmTotal = currFarm.get(year);
+    	
+    	
+    	// adds  farm's yearly total to report
+    	report.put("Farm " + ID + " Total", String.valueOf(farmTotal));
+    	
+    	// adds the farm and its yearly total to piegraph
+    	Integer farmTotal2 = farmTotal;
+    	String farm = "Farm" + ID;
+    	Pair<String, Integer> pair = new Pair<String, Integer>(farm, farmTotal2);
+    	pieGraph.add(pair);
+    	
+    	// Calculates percentage of yearly milkweight produced by one farm
+    	// compared to all farms
+    	int ratio = (farmTotal / yearWeight) * 100;
+    	double percentage = Math.round(ratio * 100.0) / 100.0;
+    	
+    	// adds percentage for farm to report
+    	report.put("Farm " + ID + " Percentage", String.valueOf(percentage));
+
+    	
+    }
+
+
+  }
+  
+  
+  
+  
+  /** Returns the milkweight produced by all farms for a given
+    * month of some year
+   	* @param month
+ 	* @param year
+ 	* @return
+ * @throws InvalidDateException 
+ 	*/
+  private int allFarmMonthWeight(int month, int year) throws InvalidDateException {
+	  int monthWeight = 0;
+	  
+	  for (int i = 0; i < Main.farms.size(); i++) {
+		  int currWeight = Main.farms.get(i).get(month, year);
+		  monthWeight = monthWeight + currWeight;
+	  }
+	  
+	  return monthWeight;
+	  
   }
   
   // MONTHLY REPORT
@@ -130,12 +342,95 @@ public class Report {
    * @param year   the year for the report
    * @param month   the month for the report
    * @throws InvalidReportException if the year is null
+ * @throws InvalidDateException 
    */
-  public Report(int year, int month) throws InvalidReportException {
+  public Report(int year, int month) throws InvalidReportException, InvalidDateException {
     report = new HashMap<String, String>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
+    
+    
+    if (year <= 0) {
+    	throw new InvalidReportException("ERROR: Invalid Year");
+    }
+    
+    // gets total milkweight produced by all farms for a given month and year
+    int totalMonthWeight = allFarmMonthWeight(month, year);
 
-    // TODO implement initialization for MONTHLY REPORT
+    // adds the year to report
+    report.put("Year", String.valueOf(year));
+    // adds the month to the report
+    report.put("Month", String.valueOf(month));
+    // adds the total milkweight produced by all farms for a given month
+    // to report
+    report.put("Month Total", String.valueOf(totalMonthWeight));
+    
+    // loops through each farm, adding their monthly total 
+    // and percentage of all farms monthly total to report,
+    // also adds the monthly total for each farm to piegraph
+    for (int i = 0; i < Main.farms.size(); i++) {
+    	
+    	// gets current farm in list of farms
+    	Farm currFarm = Main.farms.get(i);
+    	// gets ID of current farm
+    	String ID = currFarm.getID();
+    	// gets monthly milkweight total for a farm 
+    	int monthTotal = currFarm.get(month, year);
+    	
+    	// adds farms monthly total to report
+    	report.put("Farm" + ID + " Total", String.valueOf(monthTotal));
+    	
+    	// adds each farms monthly total to piegraph
+    	Integer monthTotal2 = monthTotal;
+    	String farm = "Farm" + ID;
+    	Pair<String, Integer> pair = new Pair<String, Integer>(farm, monthTotal2);
+    	pieGraph.add(pair);
+    	
+    	// Calculates monthly percentage of each farm compared to all farms
+    	int ratio = (monthTotal / totalMonthWeight) * 100;
+    	double percentage = Math.round(ratio * 100.0) * 100.0;
+    	
+    	// adds monthly percentage to report
+    	report.put("Farm" + ID + " Percentage", String.valueOf(percentage));
+    	
+    	
+    }
+
+
+  }
+  
+  
+  
+  /** Method returns the total milkweight produced by 
+   	* all farms over a specified date range
+   	* @param start
+ 	* @param end
+ 	* @return
+ * @throws InvalidDateException 
+ 	*/
+  private int weightOverRange(LocalDate start, LocalDate end) throws InvalidDateException {
+	  int totalWeight = 0;
+	  
+	  	// loops through each farm and calculates the total weight
+	  	// produced by all farms over a range of dates
+	    for (int i = 0; i < Main.farms.size(); i++) {
+	    	Farm currentFarm = Main.farms.get(i);
+	  	  	LocalDate currentDate = start;
+
+	  	  	// loops through each day in date range (inclusively)
+	  	  	// while adding to the totalweight 
+	    	while (currentDate.isBefore(end.plusDays(1))) {
+	    		int dayWeight = currentFarm.get(currentDate);
+	    		totalWeight = totalWeight + dayWeight;
+	    		currentDate = currentDate.plusDays(1);
+	    	}
+	    		
+	    		
+	    }
+	    
+	    return totalWeight;
+	  
+	  
+	  
   }
   
   // DATE RANGE REPORT
@@ -168,12 +463,77 @@ public class Report {
    * @param startDate the start of the date range for the report
    * @param endDate the end of the date range for the report
    * @throws InvalidReportException if the year is null
+ * @throws InvalidDateException 
    */
-  public Report(Date startDate, Date endDate) throws InvalidReportException {
+  public Report(LocalDate startDate, LocalDate endDate) throws InvalidReportException, InvalidDateException {
     report = new HashMap<String, String>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
+    
+    // Formats a date into a string in the format "yyyy-mm-dd"
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");  
+    String start = dateFormat.format(startDate);
+    String end = dateFormat.format(endDate);
+    
+    // adds the start and end date to report
+    report.put("Start Date", start);
+    report.put("End Date", end);
+    
+    // calculates the total weight produced by all farms over the 
+    // specified date range 
+    int totalRangeWeight = weightOverRange(startDate, endDate);	
+    
+    // adds the total milkweight produced by all farms over a given
+    // date range to report
+    report.put("Range Total", String.valueOf(totalRangeWeight));
+    
+    
+    // loops through each farm and calculates farm milkweight
+    // data over the date range for each farm
+    for (int i = 0; i < Main.farms.size(); i++) {
+    	
+    	// gets current farm and ID of current farm
+    	Farm currentFarm = Main.farms.get(i);
+    	String ID = currentFarm.getID();
+ 
+  	  	LocalDate currentDate = startDate;
+  	  	int farmRangeWeight = 0;
 
-    // TODO implement initialization for DATE RANGE REPORT
+  	  	// loops through each day in date range (inclusively) keeping running total
+  	  	// of total milk weight for each farm
+    	while (currentDate.isBefore(endDate.plusDays(1))) {
+    		
+    		// weight produced on the current date
+    		int dayWeight = currentFarm.get(currentDate);
+    		// adds current date weight to total farm weight
+    		farmRangeWeight = farmRangeWeight + dayWeight;
+    		// increments the date by one day
+    		currentDate = currentDate.plusDays(1);
+    	}
+    	
+    	// at this point, farmRangeWeight is equal to the total weight 
+    	// produced by one over the given date range
+    	
+    	// add farms date range weight to report
+    	report.put("Farm " + ID + " Total", String.valueOf(farmRangeWeight));
+    	
+    	// adds each farms date range weight to pie graph
+    	Integer farmWeight2 = farmRangeWeight;
+    	String farm = "Farm " + ID;
+    	Pair<String, Integer> pair = new Pair<String, Integer>(farm, farmWeight2);
+    	pieGraph.add(pair);
+    	
+   
+    	// calculates percentage of weight produced by one farm over given
+    	// date range compared to all farms weight produced in that range
+    	int ratio = (farmRangeWeight / totalRangeWeight) * 100;
+    	double percentage = Math.round(ratio * 100.0) / 100.0;
+    	
+    	// adds farms weight range percentage to report
+    	report.put("Farm " + ID + " Percentage", String.valueOf(percentage));
+    		
+    }	
+    	
+
   }
   
   /**
