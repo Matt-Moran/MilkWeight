@@ -7,14 +7,17 @@
 
 package application;
 
-import java.util.Map.Entry;
-
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.scene.chart.*;
@@ -26,14 +29,48 @@ import javafx.scene.chart.*;
  */
 public class ReportScene {
 
+//Pair Table Row Inner-Class
+  public static class PairRow {
+    public StringProperty key;
+    public StringProperty value;
+
+    public PairRow(String key, String value) {
+      setKey(key);
+      setValue(value);
+    }
+
+    public void setKey(String value) {
+      keyProperty().set(value);
+    }
+
+    public void setValue(String value) {
+      valueProperty().set(value);
+    }
+
+    public StringProperty keyProperty() {
+      if (key == null)
+        key = new SimpleStringProperty(this, "key");
+      return key;
+    }
+
+    public StringProperty valueProperty() {
+      if (value == null)
+        value = new SimpleStringProperty(this, "value");
+      return value;
+    }
+  }
+
+  // Array list of Row objects
+  static ObservableList<PairRow> pairRows = FXCollections.observableArrayList();
+
   // Main Pane containing the scene's content
   private static BorderPane root;
 
   // Pie Chart
-  private static PieChart pieChart;
+  private static PieChart pieChart = new PieChart();
 
-  // Report Details
-  private static Text resultText;
+  // Create the TableView for each column
+  private static TableView<PairRow> dataTable = new TableView<>();
 
   /**
    * Generates the elements for the report scene
@@ -48,9 +85,26 @@ public class ReportScene {
     root = new BorderPane();
 
     /*
-     * BorderPane Left (Displaying Report Text and New Report)
+     * BorderPane Center (Displaying Report Text and New Report)
      */
 
+    // Create the three columns for each value
+    TableColumn<PairRow, String> farmColumn = new TableColumn<>("Key");
+    farmColumn.setCellValueFactory(x -> x.getValue().keyProperty());
+    TableColumn<PairRow, String> dateColumn = new TableColumn<>("Value");
+    dateColumn.setCellValueFactory(x -> x.getValue().valueProperty());
+
+    // add each column to the table
+    dataTable.getColumns().add(farmColumn);
+    dataTable.getColumns().add(dateColumn);
+
+    // Set each columns properties and size
+    for (TableColumn<PairRow, ?> c : dataTable.getColumns()) {
+      c.setReorderable(false);
+      c.setResizable(false);
+      c.prefWidthProperty().bind(dataTable.widthProperty().divide(2));
+      c.setSortable(false);
+    }
     // Create an VBox to store the Text and Return Button
     VBox vbox = new VBox();
     vbox.setSpacing(10);
@@ -62,24 +116,21 @@ public class ReportScene {
       Main.setStage("Import");
     });
 
-    // Display A Text Box with Report Data
-    resultText = new Text();
+    // Create Export Report Button
+    Button exportReportButton = new Button("Export Report");
 
     // Add the elements to the VBox
-    vbox.getChildren().setAll(resultText, newReportButton);
+    vbox.getChildren().setAll(newReportButton, exportReportButton, pieChart);
 
     // Set the VBox to the Left
-    root.setLeft(vbox);
+    root.setCenter(dataTable);
 
     /*
-     * BorderPane Center (Pie Graph)
+     * BorderPane Right (Pie Graph)
      */
 
-    // Create the Pie Chart
-    pieChart = new PieChart();
-
     // Display Pie Chart in Center
-    root.setCenter(pieChart);
+    root.setRight(vbox);
   }
 
   /**
@@ -93,19 +144,28 @@ public class ReportScene {
   }
 
   public static void setReport(Report report) {
+    // Reset the Pie Chart and Text
+    pieChart = new PieChart();
+    pairRows = FXCollections.observableArrayList();
+
     // Set the title of the Pie Chart as the Report Type
     pieChart.setTitle(report.getType() + " Report");
-    
+
     // Add slices to the pie chart
     for (Pair<String, Integer> pair : report.getPieGraph()) {
       PieChart.Data slice = new PieChart.Data(pair.getKey(), pair.getValue());
       pieChart.getData().add(slice);
     }
-    
-    // Set the text for the report details
-    String result = new String();
-    for(Entry<String, String> entry : report.getReport().entrySet())
-      result = result.concat(entry.getKey() + ": " + entry.getValue() + "\n");
-    resultText.setText(result);
+
+    // If there is more than 30 slices, remove the pie chart
+    if (pieChart.getData().size() > 30)
+      pieChart.visibleProperty().setValue(false);
+    else
+      pieChart.visibleProperty().setValue(true);
+
+    // Set the text for the report details table
+    for (Pair<String, String> pair : report.getReport())
+      pairRows.add(new PairRow(pair.getKey(), pair.getValue()));
+    dataTable.setItems(pairRows);
   }
 }

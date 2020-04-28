@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -28,6 +29,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -194,19 +196,6 @@ public class ImportScene {
      * Events
      */
 
-    // Generate Report Button
-    generateButton.setOnAction(e -> {
-      Main.setStage("Report");
-      Report r;
-      try {
-        r = new Report("80", 2019);
-        ReportScene.setReport(r);
-      } catch (InvalidReportException | InvalidDateException error) {
-        error.printStackTrace();
-      }
-
-    });
-
     // Add Button
     addButton.setOnAction(e -> {
       try {
@@ -253,11 +242,7 @@ public class ImportScene {
         try {
           Import.Parse(file);
         } catch (MissingDataException | DataFormatException | IOException error) {
-          Alert alert = new Alert(AlertType.ERROR);
-          alert.setTitle("CSV Import Error");
-          alert.setHeaderText("CSV Import Error");
-          alert.setContentText(error.getMessage());
-          alert.showAndWait();
+          errorPrompt(stage, "CSV Import", error.getMessage());
         }
       }
       // After the import is done, update the table
@@ -266,12 +251,70 @@ public class ImportScene {
 
     // Generate Report Button
     generateButton.setOnAction(e -> {
-      // Switch to the Report Scene
-      Main.setStage("Report");
-      try {
-        ReportScene.setReport(new Report("80", 2019));
-      } catch (InvalidReportException | InvalidDateException error) {
-        System.out.println(error.getMessage());
+      Report report;
+      if (!comboBox.getSelectionModel().isEmpty()) {
+        if (comboBox.getValue().equals("Farm")) {
+          String id = textPrompt("Farm ID");
+          Integer year;
+          try {
+            year = Integer.parseInt(textPrompt("Year"));
+          } catch (NumberFormatException error) {
+            year = null;
+          }
+          if (id != null && year != null) {
+            try {
+              report = new Report(id, year);
+              ReportScene.setReport(report);
+              Main.setStage("Report");
+            } catch (InvalidReportException | InvalidDateException error) {
+              errorPrompt(stage, "Report Creation", "Report generation error occured.");
+            }
+          } else {
+            errorPrompt(stage, "Report Creation", "Invalid farm ID and year inputs.");
+          }
+        } else if (comboBox.getValue().equals("Annual")) {
+          Integer year;
+          try {
+            year = Integer.parseInt(textPrompt("Year"));
+          } catch (NumberFormatException error) {
+            year = null;
+          }
+          if (year != null) {
+            try {
+              report = new Report(year);
+              ReportScene.setReport(report);
+              Main.setStage("Report");
+            } catch (InvalidReportException | InvalidDateException error) {
+              errorPrompt(stage, "Report Creation", "Report generation error occured.");
+            }
+          } else {
+            errorPrompt(stage, "Report Creation", "Invalid year input.");
+          }
+        } else if (comboBox.getValue().equals("Monthly")) {
+          Integer year, month;
+          try {
+            year = Integer.parseInt(textPrompt("Year"));
+            month = Integer.parseInt(textPrompt("Month"));
+          } catch (NumberFormatException error) {
+            year = null;
+            month = null;
+          }
+          if (year != null && month != null) {
+            try {
+              report = new Report(year);
+              ReportScene.setReport(report);
+              Main.setStage("Report");
+            } catch (InvalidReportException | InvalidDateException error) {
+              errorPrompt(stage, "Report Creation", "Report generation error occured.");
+            }
+          } else {
+            errorPrompt(stage, "Report Creation", "Invalid year input.");
+          }
+        } else if (comboBox.getValue().equals("Date Range")) {
+          Main.setStage("Report");
+        }
+      } else {
+        errorPrompt(stage, "Report Selection", "Select a report type before generating a report.");
       }
     });
   }
@@ -343,6 +386,25 @@ public class ImportScene {
     for (Farm farm : Main.farms)
       for (Entry<LocalDate, Integer> entry : farm.getSet())
         farmRows.add(new FarmRow(farm.getID(), entry.getKey(), entry.getValue()));
+  }
+
+  private static String textPrompt(String name) {
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Enter " + name);
+    dialog.setHeaderText("Enter " + name);
+    Optional<String> result = dialog.showAndWait();
+    if (result.isPresent()) {
+      return result.get();
+    }
+    return null;
+  }
+
+  private static void errorPrompt(Stage stage, String title, String message) {
+    Alert alert = new Alert(AlertType.ERROR);
+    alert.setTitle(title + " Error");
+    alert.setHeaderText(title + " Error");
+    alert.setContentText(message);
+    alert.showAndWait();
   }
 
 }

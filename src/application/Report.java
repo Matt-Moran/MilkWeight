@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javafx.util.Pair;
 
@@ -16,7 +15,7 @@ public class Report {
    * Helps store the import information for the report. (Key: (value) == (String
    * key, String value))
    */
-  private HashMap<String, String> report;
+  private ArrayList<Pair<String, String>> report;
   
   // Stores the name of the report generated
   private String type;
@@ -52,7 +51,7 @@ public class Report {
    */
   public Report(String farmId, int year) throws InvalidReportException, InvalidDateException {
     type = "Farm";
-    report = new HashMap<String, String>();
+    report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
 
     if (farmId == null) {
@@ -66,15 +65,15 @@ public class Report {
     }
 
     // Adds farmId and Year to report
-    report.put("Farm ID", farmId);
-    report.put("Year", String.valueOf(year));
+    report.add(new Pair<>("Farm ID", farmId));
+    report.add(new Pair<>("Year", String.valueOf(year)));
 
     // total milkweight produced by all farms for a given year
     int totalYearWeight = getTotalWeightOfYear(year);
     // total milkweight produced by given farm for given year
     int farmYearWeight = findFarm(farmId).get(year);
     // adds the total weight produced by the farm to the report
-    report.put("Year Total", String.valueOf(farmYearWeight));
+    report.add(new Pair<>("Year Total", String.valueOf(farmYearWeight)));
 
     // calculates percentage of milkweight produced by one farm
     // compared to all farms for one year
@@ -83,7 +82,7 @@ public class Report {
 
     // adds percentage of of milkweight produced by one farm
     // compared to all farms for one year to report
-    report.put("Year Percentage", String.valueOf(yearPercentage));
+    report.add(new Pair<>("Year Percentage", String.valueOf(yearPercentage)));
 
     // for each month, calculates the monthly percentage of milk
     // weight produced by a farm compared to the total milk weight
@@ -114,9 +113,9 @@ public class Report {
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds monthly total milk weight produced by farm to report
-      report.put("Month " + String.valueOf(i) + " Total", String.valueOf(farmMonthWeight));
+      report.add(new Pair<>("Month " + String.valueOf(i) + " Total", String.valueOf(farmMonthWeight)));
       // adds monthly percentage of total milkweight produced by one farm to report
-      report.put("Month " + String.valueOf(i) + " Percentage", String.valueOf(percentage));
+      report.add(new Pair<>("Month " + String.valueOf(i) + " Percentage", String.valueOf(percentage)));
 
       // adds the month and weight produced by the farm for each
       // month to the pieGraph
@@ -196,7 +195,7 @@ public class Report {
    */
   public Report(int year) throws InvalidReportException, InvalidDateException {
     type = "Annual";
-    report = new HashMap<String, String>();
+    report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
 
     if (year <= 0) {
@@ -204,14 +203,14 @@ public class Report {
     }
 
     // adds year to report
-    report.put("Year", String.valueOf(year));
+    report.add(new Pair<>("Year", String.valueOf(year)));
 
     // total milkweight produced by all farms in a given year
     int yearWeight = getTotalWeightOfYear(year);
 
     // adds total milk weight produced by all farms
     // for a given year to report
-    report.put("Year Total", String.valueOf(yearWeight));
+    report.add(new Pair<>("Year Total", String.valueOf(yearWeight)));
 
     // loops through all farms, adding their total milkweight produced
     // of that given year to report and piegraph,
@@ -228,7 +227,7 @@ public class Report {
       int farmTotal = currFarm.get(year);
 
       // adds farm's yearly total to report
-      report.put("Farm " + ID + " Total", String.valueOf(farmTotal));
+      report.add(new Pair<>("Farm " + ID + " Total", String.valueOf(farmTotal)));
 
       // adds the farm and its yearly total to piegraph
       Integer farmTotal2 = farmTotal;
@@ -242,7 +241,7 @@ public class Report {
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds percentage for farm to report
-      report.put("Farm " + ID + " Percentage", String.valueOf(percentage));
+      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage)));
 
     }
 
@@ -291,7 +290,7 @@ public class Report {
    */
   public Report(int year, int month) throws InvalidReportException, InvalidDateException {
     type = "Monthly";
-    report = new HashMap<String, String>();
+    report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
 
     if (year <= 0) {
@@ -302,12 +301,12 @@ public class Report {
     int totalMonthWeight = allFarmMonthWeight(month, year);
 
     // adds the year to report
-    report.put("Year", String.valueOf(year));
+    report.add(new Pair<>("Year", String.valueOf(year)));
     // adds the month to the report
-    report.put("Month", String.valueOf(month));
+    report.add(new Pair<>("Month", String.valueOf(month)));
     // adds the total milkweight produced by all farms for a given month
     // to report
-    report.put("Month Total", String.valueOf(totalMonthWeight));
+    report.add(new Pair<>("Month Total", String.valueOf(totalMonthWeight)));
 
     // loops through each farm, adding their monthly total
     // and percentage of all farms monthly total to report,
@@ -322,7 +321,7 @@ public class Report {
       int monthTotal = currFarm.get(month, year);
 
       // adds farms monthly total to report
-      report.put("Farm" + ID + " Total", String.valueOf(monthTotal));
+      report.add(new Pair<>("Farm" + ID + " Total", String.valueOf(monthTotal)));
 
       // adds each farms monthly total to piegraph
       Integer monthTotal2 = monthTotal;
@@ -335,7 +334,7 @@ public class Report {
       double percentage = Math.round(ratio * 100.0) * 100.0;
 
       // adds monthly percentage to report
-      report.put("Farm" + ID + " Percentage", String.valueOf(percentage));
+      report.add(new Pair<>("Farm" + ID + " Percentage", String.valueOf(percentage)));
 
     }
 
@@ -396,7 +395,7 @@ public class Report {
    */
   public Report(LocalDate startDate, LocalDate endDate) throws InvalidReportException, InvalidDateException {
     type = "Date Range";
-    report = new HashMap<String, String>();
+    report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
 
     // Formats a date into a string in the format "yyyy-mm-dd"
@@ -405,8 +404,8 @@ public class Report {
     String end = dateFormat.format(endDate);
 
     // adds the start and end date to report
-    report.put("Start Date", start);
-    report.put("End Date", end);
+    report.add(new Pair<>("Start Date", start));
+    report.add(new Pair<>("End Date", end));
 
     // calculates the total weight produced by all farms over the
     // specified date range
@@ -414,7 +413,7 @@ public class Report {
 
     // adds the total milkweight produced by all farms over a given
     // date range to report
-    report.put("Range Total", String.valueOf(totalRangeWeight));
+    report.add(new Pair<>("Range Total", String.valueOf(totalRangeWeight)));
 
     // loops through each farm and calculates farm milkweight
     // data over the date range for each farm
@@ -443,7 +442,7 @@ public class Report {
       // produced by one over the given date range
 
       // add farms date range weight to report
-      report.put("Farm " + ID + " Total", String.valueOf(farmRangeWeight));
+      report.add(new Pair<>("Farm " + ID + " Total", String.valueOf(farmRangeWeight)));
 
       // adds each farms date range weight to pie graph
       Integer farmWeight2 = farmRangeWeight;
@@ -457,7 +456,7 @@ public class Report {
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds farms weight range percentage to report
-      report.put("Farm " + ID + " Percentage", String.valueOf(percentage));
+      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage)));
 
     }
 
@@ -468,7 +467,7 @@ public class Report {
    * 
    * @return the report string array for the GUI
    */
-  public HashMap<String, String> getReport() {
+  public ArrayList<Pair<String, String>> getReport() {
     return report;
   }
 
