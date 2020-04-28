@@ -345,4 +345,37 @@ public class ImportTest {
 			fail("Should not throw other type of exception");
 		}
 	}
+
+	@Test
+	public void test026_testingFarmIDasAComma() {
+		try {
+			File file = new File("data/extra/2019-1.csv");
+			Import.Parse(file);
+		} catch (Exception e) {
+			fail("Should not throw any type of exception");
+		}
+	}
+
+	@Test
+	public void test027_testingFarmIDasEmptyWhiteSpace() {
+		try {
+			File file = new File("data/extra/2019-2.csv");
+			Import.Parse(file);
+		} catch (Exception e) {
+			fail("Should not throw any exception");
+		}
+	}
+
+	@Test
+	public void test028_farmIDasEmptyString() {
+		try {
+			File file = new File("data/extra/2019-3.csv");
+			Import.Parse(file);
+			fail("Did not throw Data format exception");
+		} catch (DataFormatException e) {
+			// should throw missing data exception
+		} catch (Exception e) {
+			fail("Should not throw any exception");
+		}
+	}
 }

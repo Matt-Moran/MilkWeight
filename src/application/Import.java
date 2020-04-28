@@ -146,7 +146,7 @@ public class Import {
 		if (!farms[0].contains("Farm")) { // checks if it contains "farm" format
 			throw new DataFormatException("ID isn't in correct format in csv file");
 		}
-		if (farms[1] == null) // farm id can't be null, has to have some name
+		if (farms[1] == null || farms[1].equals(""))// farm id can't be null, has to have some name
 			throw new DataFormatException("farm id is null");
 		return farms[1];
 	}
