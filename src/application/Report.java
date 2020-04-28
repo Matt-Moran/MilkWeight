@@ -49,7 +49,7 @@ public class Report {
    *                                exist or if the year is null
    * @throws InvalidDateException
    */
-  public Report(String farmId, int year) throws InvalidReportException, InvalidDateException {
+  public Report(String farmId, int year, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
     type = "Farm";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
@@ -57,7 +57,7 @@ public class Report {
     if (farmId == null) {
       throw new InvalidReportException("ERROR: Invalid Farm ID");
     }
-    if (!farmExists(farmId)) {
+    if (!farmExists(farmId, farms)) {
       throw new InvalidReportException("ERROR: Farm ID not found");
     }
     if (year <= 0) {
@@ -69,10 +69,10 @@ public class Report {
     report.add(new Pair<>("Year", String.valueOf(year)));
 
     // total milkweight produced by all farms for a given year
-    int totalYearWeight = getTotalWeightOfYear(year);
+    int totalYearWeight = getTotalWeightOfYear(year, farms);
     
     // total milkweight produced by given farm for given year
-    int farmYearWeight = findFarm(farmId).get(year);
+    int farmYearWeight = findFarm(farmId, farms).get(year);
     // adds the total weight produced by the farm to the report
     report.add(new Pair<>("Year Total", String.valueOf(farmYearWeight)));
 
@@ -98,13 +98,13 @@ public class Report {
 
       // calculates total milkweight produced by all farms
       // for one month
-      for (int j = 0; j < Main.farms.size(); j++) {
-        int currMonthWeight = Main.farms.get(j).get(i, year);
+      for (int j = 0; j < farms.size(); j++) {
+        int currMonthWeight = farms.get(j).get(i, year);
         totalMonthWeight = totalMonthWeight + currMonthWeight;
       }
 
       // gets farm specified by user input
-      Farm farm = findFarm(farmId);
+      Farm farm = findFarm(farmId, farms);
       // gets farm weight produced by farm for the month
       int farmMonthWeight = farm.get(i, year);
       
@@ -128,7 +128,7 @@ public class Report {
 
       // adds the month and weight produced by the farm for each
       // month to the pieGraph
-      Integer farmMonthWeight3 = findFarm(farmId).get(i, year);
+      Integer farmMonthWeight3 = findFarm(farmId, farms).get(i, year);
       String month = "Month " + String.valueOf(i);
       Pair<String, Integer> pair = new Pair<String, Integer>(month, farmMonthWeight3);
       pieGraph.add(pair);
@@ -144,12 +144,12 @@ public class Report {
    * @return
    * @throws InvalidDateException
    */
-  private int getTotalWeightOfYear(int year) throws InvalidDateException {
+  private int getTotalWeightOfYear(int year, ArrayList<Farm> farms) throws InvalidDateException {
     int totalWeight = 0;
 
     // finds the total milk weight of all farms for a given year
-    for (int i = 0; i < Main.farms.size(); i++) {
-      int currYearWeight = Main.farms.get(i).get(year);
+    for (int i = 0; i < farms.size(); i++) {
+      int currYearWeight = farms.get(i).get(year);
       totalWeight = totalWeight + currYearWeight;
     }
 
@@ -162,9 +162,9 @@ public class Report {
    * @param farmId
    * @return
    */
-  private boolean farmExists(String farmId) {
-    for (int i = 0; i < Main.farms.size(); i++)
-      if (Main.farms.get(i).getID().equals(farmId))
+  private boolean farmExists(String farmId, ArrayList<Farm> farms) {
+    for (int i = 0; i < farms.size(); i++)
+      if (farms.get(i).getID().equals(farmId))
         return true;
     return false;
   }
@@ -175,10 +175,10 @@ public class Report {
    * @param farmId of farm
    * @return farm of farmId
    */
-  private Farm findFarm(String farmId) {
-    for (int i = 0; i < Main.farms.size(); i++)
-      if (Main.farms.get(i).getID().equals(farmId))
-        return Main.farms.get(i);
+  private Farm findFarm(String farmId, ArrayList<Farm> farms) {
+    for (int i = 0; i < farms.size(); i++)
+      if (farms.get(i).getID().equals(farmId))
+        return farms.get(i);
     return null;
   }
 
@@ -202,7 +202,7 @@ public class Report {
    * @throws InvalidReportException if the year is null
    * @throws InvalidDateException
    */
-  public Report(int year) throws InvalidReportException, InvalidDateException {
+  public Report(int year, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
     type = "Annual";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
@@ -215,7 +215,7 @@ public class Report {
     report.add(new Pair<>("Year", String.valueOf(year)));
 
     // total milkweight produced by all farms in a given year
-    int yearWeight = getTotalWeightOfYear(year);
+    int yearWeight = getTotalWeightOfYear(year, farms);
 
     // adds total milk weight produced by all farms
     // for a given year to report
@@ -225,10 +225,10 @@ public class Report {
     // of that given year to report and piegraph,
     // and adds percentage of milkweight produced for a farm compared to
     // all farms for a given year to report as well
-    for (int i = 0; i < Main.farms.size(); i++) {
+    for (int i = 0; i < farms.size(); i++) {
 
       // gets current farm and ID
-      Farm currFarm = Main.farms.get(i);
+      Farm currFarm = farms.get(i);
       String ID = currFarm.getID();
 
       // gets total weight produced by the farm for the
@@ -267,11 +267,11 @@ public class Report {
    * @return
    * @throws InvalidDateException
    */
-  private int allFarmMonthWeight(int month, int year) throws InvalidDateException {
+  private int allFarmMonthWeight(int month, int year, ArrayList<Farm> farms) throws InvalidDateException {
     int monthWeight = 0;
 
-    for (int i = 0; i < Main.farms.size(); i++) {
-      int currWeight = Main.farms.get(i).get(month, year);
+    for (int i = 0; i < farms.size(); i++) {
+      int currWeight = farms.get(i).get(month, year);
       monthWeight = monthWeight + currWeight;
     }
 
@@ -300,7 +300,7 @@ public class Report {
    * @throws InvalidReportException if the year is null
    * @throws InvalidDateException
    */
-  public Report(int year, int month) throws InvalidReportException, InvalidDateException {
+  public Report(int year, int month, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
     type = "Monthly";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
@@ -310,7 +310,7 @@ public class Report {
     }
 
     // gets total milkweight produced by all farms for a given month and year
-    int totalMonthWeight = allFarmMonthWeight(month, year);
+    int totalMonthWeight = allFarmMonthWeight(month, year, farms);
 
     // adds the year to report
     report.add(new Pair<>("Year", String.valueOf(year)));
@@ -323,10 +323,10 @@ public class Report {
     // loops through each farm, adding their monthly total
     // and percentage of all farms monthly total to report,
     // also adds the monthly total for each farm to piegraph
-    for (int i = 0; i < Main.farms.size(); i++) {
+    for (int i = 0; i < farms.size(); i++) {
 
       // gets current farm in list of farms
-      Farm currFarm = Main.farms.get(i);
+      Farm currFarm = farms.get(i);
       // gets ID of current farm
       String ID = currFarm.getID();
       // gets monthly milkweight total for a farm
@@ -363,13 +363,13 @@ public class Report {
    * @return
    * @throws InvalidDateException
    */
-  private int weightOverRange(LocalDate start, LocalDate end) throws InvalidDateException {
+  private int weightOverRange(LocalDate start, LocalDate end, ArrayList<Farm> farms) throws InvalidDateException {
     int totalWeight = 0;
 
     // loops through each farm and calculates the total weight
     // produced by all farms over a range of dates
-    for (int i = 0; i < Main.farms.size(); i++) {
-      Farm currentFarm = Main.farms.get(i);
+    for (int i = 0; i < farms.size(); i++) {
+      Farm currentFarm = farms.get(i);
       LocalDate currentDate = start;
 
       // loops through each day in date range (inclusively)
@@ -407,7 +407,7 @@ public class Report {
    * @throws InvalidReportException if the year is null
    * @throws InvalidDateException
    */
-  public Report(LocalDate startDate, LocalDate endDate) throws InvalidReportException, InvalidDateException {
+  public Report(LocalDate startDate, LocalDate endDate, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
     type = "Date Range";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
@@ -423,7 +423,7 @@ public class Report {
 
     // calculates the total weight produced by all farms over the
     // specified date range
-    int totalRangeWeight = weightOverRange(startDate, endDate);
+    int totalRangeWeight = weightOverRange(startDate, endDate, farms);
     
     if (totalRangeWeight == 0) {
     	totalRangeWeight = 1;
@@ -435,10 +435,10 @@ public class Report {
 
     // loops through each farm and calculates farm milkweight
     // data over the date range for each farm
-    for (int i = 0; i < Main.farms.size(); i++) {
+    for (int i = 0; i < farms.size(); i++) {
 
       // gets current farm and ID of current farm
-      Farm currentFarm = Main.farms.get(i);
+      Farm currentFarm = farms.get(i);
       String ID = currentFarm.getID();
 
       LocalDate currentDate = startDate;
