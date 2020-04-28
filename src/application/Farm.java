@@ -2,6 +2,8 @@ package application;
 
 import java.time.LocalDate;
 import java.util.Hashtable;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * 
@@ -16,7 +18,8 @@ public class Farm implements FarmADT {
   private String id;
 
   public Farm(String id) {
-    // Initialize the farm with a string ID and a LocalDate (date) and Integer (weight) hash map
+    // Initialize the farm with a string ID and a LocalDate (date) and Integer
+    // (weight) hash map
     farmTable = new Hashtable<LocalDate, Integer>();
     this.id = id;
   }
@@ -28,6 +31,14 @@ public class Farm implements FarmADT {
    */
   public String getID() {
     return id;
+  }
+  
+  /**
+   * Get a list of all current date and weight entries for the farm
+   * @return a set of date and weight entries for the farm
+   */
+  public Set<Entry<LocalDate, Integer>> getSet() {
+    return farmTable.entrySet();
   }
 
   /**

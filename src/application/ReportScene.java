@@ -7,6 +7,8 @@
 
 package application;
 
+import java.util.Map.Entry;
+
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,6 +16,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import javafx.scene.chart.*;
 
 /**
@@ -25,6 +28,12 @@ public class ReportScene {
 
   // Main Pane containing the scene's content
   private static BorderPane root;
+
+  // Pie Chart
+  private static PieChart pieChart;
+
+  // Report Details
+  private static Text resultText;
 
   /**
    * Generates the elements for the report scene
@@ -54,14 +63,7 @@ public class ReportScene {
     });
 
     // Display A Text Box with Report Data
-    Text resultText = new Text();
-
-    // START OF TEMPORARY EXAMPLE DATA CODE
-    resultText.setText("Farm ID: farm01\n" + "Year: 2019\n\n" + "Monthly Milk Weights:\n" + "Month 1: 100\n"
-        + "Month 2: 200\n" + "Month 3: 300\n" + "Month 4: 400\n" + "Month 5: 500\n" + "Month 6: 600\n"
-        + "Month 7: 700\n" + "Month 8: 800\n" + "Month 9: 900\n" + "Month 10: 1,000\n" + "Month 11: 1,100\n"
-        + "Month 12: 1,200\n\n" + "Total Weight: 7,800");
-    // END OF TEMPORARY EXAMPLE DATA CODE
+    resultText = new Text();
 
     // Add the elements to the VBox
     vbox.getChildren().setAll(resultText, newReportButton);
@@ -74,22 +76,7 @@ public class ReportScene {
      */
 
     // Create the Pie Chart
-    PieChart pieChart = new PieChart();
-
-    // Declare the Type of Report
-    String reportType;
-
-    // START OF TEMPORARY EXAMPLE DATA CODE
-    reportType = "Farm";
-    for (int i = 1; i <= 12; i++) {
-      PieChart.Data slice = new PieChart.Data("Month " + i, i * 100);
-
-      pieChart.getData().add(slice);
-    }
-    // END OF TEMPORARY EXAMPLE DATA CODE
-
-    // Set the title of the Pie Chart as the Report Type
-    pieChart.setTitle(reportType + " Report");
+    pieChart = new PieChart();
 
     // Display Pie Chart in Center
     root.setCenter(pieChart);
@@ -103,5 +90,22 @@ public class ReportScene {
     stage.setTitle(title);
     stage.setScene(new Scene(root, width, height));
     stage.show();
+  }
+
+  public static void setReport(Report report) {
+    // Set the title of the Pie Chart as the Report Type
+    pieChart.setTitle(report.getType() + " Report");
+    
+    // Add slices to the pie chart
+    for (Pair<String, Integer> pair : report.getPieGraph()) {
+      PieChart.Data slice = new PieChart.Data(pair.getKey(), pair.getValue());
+      pieChart.getData().add(slice);
+    }
+    
+    // Set the text for the report details
+    String result = new String();
+    for(Entry<String, String> entry : report.getReport().entrySet())
+      result = result.concat(entry.getKey() + ": " + entry.getValue() + "\n");
+    resultText.setText(result);
   }
 }

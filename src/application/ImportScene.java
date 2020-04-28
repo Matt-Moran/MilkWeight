@@ -7,14 +7,22 @@
 
 package application;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map.Entry;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
@@ -22,6 +30,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 /**
@@ -32,17 +42,28 @@ import javafx.stage.Stage;
  */
 public class ImportScene {
 
-  // START OF TEMPORARY EXAMPLE DATA CODE
-  private static class Farm {
-    private StringProperty farm;
+  // Farm Table Row Inner-Class
+  public static class FarmRow {
+    public StringProperty farm;
+    public StringProperty date;
+    public StringProperty weight;
+
+    public FarmRow(String farm, LocalDate date, int weight) {
+      setFarm(farm);
+      setDate(date.toString());
+      setWeight(String.valueOf(weight));
+    }
 
     public void setFarm(String value) {
       farmProperty().set(value);
     }
 
-    @SuppressWarnings("unused")
-    public String getFarm() {
-      return farmProperty().get();
+    public void setDate(String value) {
+      dateProperty().set(value);
+    }
+
+    public void setWeight(String value) {
+      weightProperty().set(value);
     }
 
     public StringProperty farmProperty() {
@@ -51,32 +72,10 @@ public class ImportScene {
       return farm;
     }
 
-    private StringProperty date;
-
-    public void setDate(String value) {
-      dateProperty().set(value);
-    }
-
-    @SuppressWarnings("unused")
-    public String getDate() {
-      return dateProperty().get();
-    }
-
     public StringProperty dateProperty() {
       if (date == null)
         date = new SimpleStringProperty(this, "date");
       return date;
-    }
-
-    private StringProperty weight;
-
-    public void setWeight(String value) {
-      weightProperty().set(value);
-    }
-
-    @SuppressWarnings("unused")
-    public String getWeight() {
-      return weightProperty().get();
     }
 
     public StringProperty weightProperty() {
@@ -84,19 +83,10 @@ public class ImportScene {
         weight = new SimpleStringProperty(this, "weight");
       return weight;
     }
-
-    public Farm(String f, String d, String w) {
-      setFarm(f);
-      setDate(d);
-      setWeight(w);
-    }
   }
 
-  private final static ObservableList<Farm> data = FXCollections.observableArrayList(
-      new Farm("farm01", "2/15/2019", "1,258"), new Farm("farm01", "1/26/2019", "342"),
-      new Farm("farm02", "2/5/2019", "926"), new Farm("farm03", "1/2/2019", "2,472"),
-      new Farm("farm04", "1/19/2019", "630"));
-  // END OF TEMPORARY EXAMPLE DATA CODE
+  // Array list of Row objects
+  static ObservableList<FarmRow> farmRows;
 
   // Main Pane containing the scene's content
   private static BorderPane root;
@@ -104,7 +94,7 @@ public class ImportScene {
   /**
    * Generates the elements for the import scene
    */
-  private static void createScene() {
+  private static void createScene(Stage stage) {
 
     /*
      * Initialization (Creating the Scene Base)
@@ -113,6 +103,9 @@ public class ImportScene {
     // Create an BorderPane as the root of the scene
     root = new BorderPane();
 
+    // Create the Row array list
+    farmRows = FXCollections.observableArrayList();
+
     /*
      * BorderPane Right (Manual Input, CSV Import and Report Generation)
      */
@@ -120,6 +113,7 @@ public class ImportScene {
     // Create Buttons
     Button generateButton = new Button("Generate Report");
     Button addButton = new Button("Add");
+    Button removeButton = new Button("Remove");
     Button importButton = new Button("Import CSV");
 
     // Create the ComboBox for selecting the report type
@@ -131,14 +125,24 @@ public class ImportScene {
     comboBox.setPromptText("Report Type");
 
     // Create labels and text fields for manual data input
-    TextField farmField = new TextField();
-    Label farm = new Label("Farm");
-    TextField dateField = new TextField();
-    Label date = new Label("Date");
-    TextField weightField = new TextField();
-    Label weight = new Label("Weight");
+    TextField addFarmField = new TextField();
+    Label addFarm = new Label("Farm");
+    DatePicker addDateField = new DatePicker();
+    Label addDate = new Label("Date");
+    TextField addWeightField = new TextField();
+    Label addWeight = new Label("Weight");
+    TextField removeFarmField = new TextField();
+    Label removeFarm = new Label("Farm");
+    DatePicker removeDateField = new DatePicker();
+    Label removeDate = new Label("Date");
+
+    // Create File Chooser
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Select CSV File");
+    fileChooser.getExtensionFilters().addAll(new ExtensionFilter("CSV Files", "*.csv"));
 
     // Create Separators
+    Separator removeSeparator = new Separator();
     Separator importSeparator = new Separator();
     Separator generateSeparator = new Separator();
 
@@ -149,7 +153,8 @@ public class ImportScene {
     root.setRight(vbox);
 
     // Add Labels, Buttons, ComboBox and TextFields to the right VBox
-    vbox.getChildren().addAll(farm, farmField, date, dateField, weight, weightField, addButton, importSeparator,
+    vbox.getChildren().addAll(addFarm, addFarmField, addDate, addDateField, addWeight, addWeightField, addButton,
+        removeSeparator, removeFarm, removeFarmField, removeDate, removeDateField, removeButton, importSeparator,
         importButton, generateSeparator, comboBox, generateButton);
 
     /*
@@ -157,14 +162,14 @@ public class ImportScene {
      */
 
     // Create the TableView for each column
-    TableView<Farm> dataTable = new TableView<>();
+    TableView<FarmRow> dataTable = new TableView<>();
 
     // Create the three columns for each value
-    TableColumn<Farm, String> farmColumn = new TableColumn<>("Farm ID");
+    TableColumn<FarmRow, String> farmColumn = new TableColumn<>("Farm ID");
     farmColumn.setCellValueFactory(x -> x.getValue().farmProperty());
-    TableColumn<Farm, String> dateColumn = new TableColumn<>("Date");
+    TableColumn<FarmRow, String> dateColumn = new TableColumn<>("Date");
     dateColumn.setCellValueFactory(x -> x.getValue().dateProperty());
-    TableColumn<Farm, String> weightColumn = new TableColumn<>("Weight");
+    TableColumn<FarmRow, String> weightColumn = new TableColumn<>("Weight");
     weightColumn.setCellValueFactory(x -> x.getValue().weightProperty());
 
     // add each column to the table
@@ -173,7 +178,7 @@ public class ImportScene {
     dataTable.getColumns().add(weightColumn);
 
     // Set each columns properties and size
-    for (TableColumn<Farm, ?> c : dataTable.getColumns()) {
+    for (TableColumn<FarmRow, ?> c : dataTable.getColumns()) {
       c.setReorderable(false);
       c.setResizable(false);
       c.prefWidthProperty().bind(dataTable.widthProperty().divide(3));
@@ -182,18 +187,92 @@ public class ImportScene {
     // Add the TableView to the center of the BorderPane
     root.setCenter(dataTable);
 
-    // START OF TEMPORARY EXAMPLE DATA CODE
-    dataTable.setItems(data);
-    // END OF TEMPORARY EXAMPLE DATA CODE
+    // Set the data of the TableView to the Rows array list
+    dataTable.setItems(farmRows);
 
     /*
-     * Events (Not used until A3)
+     * Events
      */
 
-    // Makes the generate report button temporarily change the scene to the
-    // ReportScene
+    // Generate Report Button
     generateButton.setOnAction(e -> {
       Main.setStage("Report");
+      Report r;
+      try {
+        r = new Report("80", 2019);
+        ReportScene.setReport(r);
+      } catch (InvalidReportException | InvalidDateException error) {
+        error.printStackTrace();
+      }
+
+    });
+
+    // Add Button
+    addButton.setOnAction(e -> {
+      try {
+        // Get the id, date and weight
+        String id = addFarmField.getText().replaceAll("\\s", "");
+        LocalDate date = addDateField.getValue();
+        int weight = Integer.parseInt(addWeightField.getText());
+        // If all three parameters are valid, call the add function
+        if (!id.isEmpty() && weight > 0 && date != null)
+          add(id, date, weight);
+      } catch (Exception error) {
+      }
+      // If there was an exception or if the data was added, clear all three fields
+      addFarmField.clear();
+      addWeightField.clear();
+      addDateField.setValue(null);
+      // After a value is added, update the table
+      updateTable();
+    });
+
+    // Remove Button
+    removeButton.setOnAction(e -> {
+      try {
+        // Get the id and date
+        String id = removeFarmField.getText().replaceAll("\\s", "");
+        LocalDate date = removeDateField.getValue();
+        // If all two parameters are valid, call the remove function
+        if (!id.isEmpty() && date != null)
+          remove(id, date);
+      } catch (Exception error) {
+      }
+      // If there was an exception or if the data was remove, clear all three fields
+      removeFarmField.clear();
+      removeDateField.setValue(null);
+      // After a value is removed, update the table
+      updateTable();
+    });
+
+    // Import CSV Button
+    importButton.setOnAction(e -> {
+      // Ask the user to select a file, than import the csv file data
+      File file = fileChooser.showOpenDialog(stage);
+      if (file != null) {
+        try {
+          Import.Parse(file);
+        } catch (MissingDataException | DataFormatException | IOException error) {
+          Alert alert = new Alert(AlertType.ERROR);
+          alert.setTitle("CSV Import Error");
+          alert.setHeaderText("CSV Import Error");
+          alert.setContentText(error.getMessage());
+          alert.showAndWait();
+        }
+      }
+      // After the import is done, update the table
+      updateTable();
+    });
+
+    // Generate Report Button
+    generateButton.setOnAction(e -> {
+      // Switch to the Report Scene
+      Main.setStage("Report");
+      try {
+        ReportScene.setReport(new Report("80", 2019));
+      } catch (InvalidReportException | InvalidDateException error) {
+        System.out.println(error.getMessage());
+      }
     });
   }
 
@@ -201,9 +280,69 @@ public class ImportScene {
    * Sets the stage to the import scene
    */
   public static void getStage(Stage stage, int width, int height, String title) {
-    createScene();
+    createScene(stage);
     stage.setTitle(title);
     stage.setScene(new Scene(root, width, height));
     stage.show();
+    updateTable();
   }
+
+  // Private Helper Methods
+
+  /**
+   * Adds a farm milk weight entry to the farm matching the id passed in the
+   * Main.farms list. If the farm does not already exist, it creates a farm and
+   * adds the milk weight entry to the new farm.
+   * 
+   * @param id     the id of the farm
+   * @param date   the date being added
+   * @param weight the weight being added
+   */
+  private static void add(String id, LocalDate date, int weight) {
+    // Create a new farm variable
+    Farm farm = null;
+    // Look through the Main.farms array list, see if any farm object has the same
+    // ID as the ID passed for the add function
+    for (Farm f : Main.farms)
+      // If the ID for the farm matches, set the farm variable to the farm in the list
+      // (variable f)
+      if (f.getID().equals(id))
+        farm = f;
+    // After the for loop, if the farm variable is still null (meaning no matches)
+    // create a new entry in the Main.farms array list
+    if (farm == null) {
+      farm = new Farm(id);
+      Main.farms.add(farm);
+    }
+    // Insert the value into the correct farm in the Main.farms array list
+    farm.insert(date, weight);
+  }
+
+  /**
+   * Removes a farm milk weight entry to the farm matching the id passed in the
+   * Main.farms list. If the farm or date entry doesn't exist, nothing occurs
+   * 
+   * @param id   the id of the farm
+   * @param date the date being removed
+   */
+  private static void remove(String id, LocalDate date) {
+    // Look through the Main.farms array list, see if any farm object has the same
+    // ID as the ID passed for the remove function
+    for (Farm f : Main.farms)
+      // If the ID for the farm matches, remove the date key from the farm
+      if (f.getID().equals(id))
+        f.remove(date);
+  }
+
+  /**
+   * Updates the main table on the scene with all the current values across all
+   * farm objects in the Main.farms array list
+   */
+  private static void updateTable() {
+    farmRows.clear();
+    for (Farm farm : Main.farms)
+      for (Entry<LocalDate, Integer> entry : farm.getSet())
+        farmRows.add(new FarmRow(farm.getID(), entry.getKey(), entry.getValue()));
+  }
+
 }
