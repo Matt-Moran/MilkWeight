@@ -70,6 +70,7 @@ public class Report {
 
     // total milkweight produced by all farms for a given year
     int totalYearWeight = getTotalWeightOfYear(year);
+    
     // total milkweight produced by given farm for given year
     int farmYearWeight = findFarm(farmId).get(year);
     // adds the total weight produced by the farm to the report
@@ -77,12 +78,16 @@ public class Report {
 
     // calculates percentage of milkweight produced by one farm
     // compared to all farms for one year
-    double yearRatio = (farmYearWeight / totalYearWeight) * 100;
+    // note: Casts year weights into doubles to do percentage calculation
+    double totalYearWeight2 = (double) totalYearWeight;
+    double farmYearWeight2 = (double) farmYearWeight;
+    
+    double yearRatio = (farmYearWeight2 / totalYearWeight2) * 100;
     double yearPercentage = Math.round(yearRatio * 100.0) / 100.0;
 
     // adds percentage of of milkweight produced by one farm
     // compared to all farms for one year to report
-    report.add(new Pair<>("Year Percentage", String.valueOf(yearPercentage)));
+    report.add(new Pair<>("Year Percentage", String.valueOf(yearPercentage) + "%"));
 
     // for each month, calculates the monthly percentage of milk
     // weight produced by a farm compared to the total milk weight
@@ -109,19 +114,23 @@ public class Report {
 
       // calculates percentage of milk weight produced by one farm
       // compared to all farms for a given month
-      int ratio = (farmMonthWeight / totalMonthWeight) * 100;
+      // Note: casts weights into double to do percentage calculation
+      double farmMonthWeight2 = (double) farmMonthWeight;
+      double totalMonthWeight2 = (double) totalMonthWeight;
+      
+      double ratio = (farmMonthWeight2 / totalMonthWeight2) * 100;
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds monthly total milk weight produced by farm to report
       report.add(new Pair<>("Month " + String.valueOf(i) + " Total", String.valueOf(farmMonthWeight)));
       // adds monthly percentage of total milkweight produced by one farm to report
-      report.add(new Pair<>("Month " + String.valueOf(i) + " Percentage", String.valueOf(percentage)));
+      report.add(new Pair<>("Month " + String.valueOf(i) + " Percentage", String.valueOf(percentage) + "%"));
 
       // adds the month and weight produced by the farm for each
       // month to the pieGraph
-      Integer farmMonthWeight2 = findFarm(farmId).get(i, year);
+      Integer farmMonthWeight3 = findFarm(farmId).get(i, year);
       String month = "Month " + String.valueOf(i);
-      Pair<String, Integer> pair = new Pair<String, Integer>(month, farmMonthWeight2);
+      Pair<String, Integer> pair = new Pair<String, Integer>(month, farmMonthWeight3);
       pieGraph.add(pair);
 
     }
@@ -237,11 +246,14 @@ public class Report {
 
       // Calculates percentage of yearly milkweight produced by one farm
       // compared to all farms
-      int ratio = (farmTotal / yearWeight) * 100;
+      double farmTotal3 = (double) farmTotal;
+      double yearWeight3 = (double) yearWeight;
+     
+      double ratio = (farmTotal3 / yearWeight3) * 100;
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds percentage for farm to report
-      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage)));
+      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage) + "%"));
 
     }
 
@@ -330,11 +342,13 @@ public class Report {
       pieGraph.add(pair);
 
       // Calculates monthly percentage of each farm compared to all farms
-      int ratio = (monthTotal / totalMonthWeight) * 100;
+      double monthTotal3 = (double) monthTotal;
+      double totalMonthWeight3 = (double) totalMonthWeight;
+      double ratio = (monthTotal3 / totalMonthWeight3) * 100;
       double percentage = Math.round(ratio * 100.0) * 100.0;
 
       // adds monthly percentage to report
-      report.add(new Pair<>("Farm" + ID + " Percentage", String.valueOf(percentage)));
+      report.add(new Pair<>("Farm" + ID + " Percentage", String.valueOf(percentage) + "%"));
 
     }
 
@@ -410,6 +424,10 @@ public class Report {
     // calculates the total weight produced by all farms over the
     // specified date range
     int totalRangeWeight = weightOverRange(startDate, endDate);
+    
+    if (totalRangeWeight == 0) {
+    	totalRangeWeight = 1;
+    }
 
     // adds the total milkweight produced by all farms over a given
     // date range to report
@@ -452,11 +470,13 @@ public class Report {
 
       // calculates percentage of weight produced by one farm over given
       // date range compared to all farms weight produced in that range
-      int ratio = (farmRangeWeight / totalRangeWeight) * 100;
+      double farmRangeWeight2 = (double) farmRangeWeight;
+      double totalRangeWeight2 = (double) totalRangeWeight;
+      double ratio = (farmRangeWeight2 / totalRangeWeight2) * 100;
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds farms weight range percentage to report
-      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage)));
+      report.add(new Pair<>("Farm " + ID + " Percentage", String.valueOf(percentage) + "%"));
 
     }
 
