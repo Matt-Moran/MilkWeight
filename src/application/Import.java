@@ -43,7 +43,7 @@ public class Import {
 		// at this point, all data in csv file is valid
 		// add each line of the file to the data
 		for (int i = 0; i < ids.size(); i++) {
-			addFarm(dates.get(0), ids.get(0), weights.get(0));
+			addFarm(dates.get(i), ids.get(i), weights.get(i));
 		}
 	}
 
@@ -104,7 +104,7 @@ public class Import {
 	}
 
 	/**
-	 * Checks if the id is valid. 
+	 * Checks if the id is valid.  
 	 * 
 	 * @param id - id checking
 	 * @throws MissingDataException - if a CSV value is null or missing
