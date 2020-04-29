@@ -18,9 +18,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.scene.chart.*;
+import javafx.scene.chart.PieChart.Data;
 
 /**
  * The scene that occurs when a report is created from the import scene
@@ -30,7 +30,7 @@ import javafx.scene.chart.*;
 public class ReportScene {
 
 //Pair Table Row Inner-Class
-  public static class PairRow {
+  public class PairRow {
     public StringProperty key;
     public StringProperty value;
 
@@ -61,28 +61,33 @@ public class ReportScene {
   }
 
   // Array list of Row objects
-  static ObservableList<PairRow> pairRows = FXCollections.observableArrayList();
+  private ObservableList<PairRow> pairRows;
 
   // Main Pane containing the scene's content
-  private static BorderPane root;
+  private BorderPane root;
 
   // Pie Chart
-  private static PieChart pieChart = new PieChart();
+  private PieChart pieChart;
 
   // Create the TableView for each column
-  private static TableView<PairRow> dataTable = new TableView<>();
+  private TableView<PairRow> dataTable;
 
-  /**
-   * Generates the elements for the report scene
-   */
-  private static void createScene() {
-
+  public ReportScene() {
     /*
      * Initialization (Creating the Scene Base)
      */
 
     // Create an BorderPane as the root of the scene
     root = new BorderPane();
+
+    // Declare Pie Chart
+    pieChart = new PieChart();
+
+    // Create Table View
+    dataTable = new TableView<PairRow>();
+
+    // Create Observable List
+    pairRows = FXCollections.observableArrayList();
 
     /*
      * BorderPane Center (Report Table)
@@ -118,6 +123,9 @@ public class ReportScene {
     // Set the VBox to the Center
     root.setCenter(dataTable);
 
+    // Set the data for the table
+    dataTable.setItems(pairRows);
+
     /*
      * BorderPane Top (Buttons)
      */
@@ -143,28 +151,24 @@ public class ReportScene {
 
   /**
    * Sets the stage to the report scene
+   * 
+   * @return
    */
-  public static void getStage(Stage stage, int width, int height, String title) {
-    createScene();
-    stage.setTitle(title);
-    stage.setScene(new Scene(root, width, height));
-    stage.show();
+  public Scene getScene(int width, int height) {
+    return new Scene(root, width, height);
   }
 
-  public static void setReport(Report report) {
-    // Reset the Pie Chart and Text
-    pieChart = new PieChart();
-    pairRows = FXCollections.observableArrayList();
-
-    // Set the data for the table
-    dataTable.setItems(pairRows);
-
+  public void setReport(Report report) {
+    // Reset the table and pie chart
+    pairRows.clear();
+    pieChart.getData().clear();
+    
     // Set the title of the Pie Chart as the Report Type
     pieChart.setTitle(report.getType() + " Report");
 
     // Add slices to the pie chart
     for (Pair<String, Integer> pair : report.getPieGraph()) {
-      PieChart.Data slice = new PieChart.Data(pair.getKey(), pair.getValue());
+      Data slice = new Data(pair.getKey(), pair.getValue());
       pieChart.getData().add(slice);
     }
 

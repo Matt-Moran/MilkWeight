@@ -1,7 +1,5 @@
 package application;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -433,8 +431,6 @@ public class Report {
     	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
-    // Formats a date into a string in the format "yyyy-mm-dd"
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
     String start = startDate.toString();
     String end = endDate.toString();
 

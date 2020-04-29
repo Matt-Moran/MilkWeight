@@ -10,6 +10,7 @@ package application;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ import javafx.stage.Stage;
 public class ImportScene {
 
   // Farm Table Row Inner-Class
-  public static class FarmRow {
+  public class FarmRow {
     public StringProperty farm;
     public StringProperty date;
     public StringProperty weight;
@@ -87,26 +88,38 @@ public class ImportScene {
     }
   }
 
+  // Variables
+
+  // Array list of Farm objects
+  private ArrayList<Farm> farms;
   // Array list of Row objects
-  static ObservableList<FarmRow> farmRows;
-
+  private ObservableList<FarmRow> farmRows;
   // Main Pane containing the scene's content
-  private static BorderPane root;
+  private BorderPane root;
+  // Import object for running imports
+  Import imp;
+// Report Scene for sending report results
+  ReportScene reportScene;
 
-  /**
-   * Generates the elements for the import scene
-   */
-  private static void createScene(Stage stage) {
-
+  public ImportScene(Stage stage, ReportScene reportScene) {
     /*
      * Initialization (Creating the Scene Base)
      */
 
-    // Create an BorderPane as the root of the scene
-    root = new BorderPane();
+    // Create the Farms array list
+    farms = new ArrayList<Farm>();
 
     // Create the Row array list
     farmRows = FXCollections.observableArrayList();
+
+    // Create an BorderPane as the root of the scene
+    root = new BorderPane();
+
+    // Create an Import object
+    imp = new Import(farms);
+
+    // Create the Report Scene
+    this.reportScene = reportScene;
 
     /*
      * BorderPane Right (Manual Input, CSV Import and Report Generation)
@@ -240,7 +253,7 @@ public class ImportScene {
       File file = fileChooser.showOpenDialog(stage);
       if (file != null) {
         try {
-          Import.Parse(file);
+          imp.Parse(file);
         } catch (MissingDataException | DataFormatException | IOException error) {
           errorPrompt(stage, "CSV Import", error.getMessage());
         }
@@ -263,8 +276,8 @@ public class ImportScene {
           }
           if (id != null && year != null) {
             try {
-              report = new Report(id, year, Main.farms);
-              ReportScene.setReport(report);
+              report = new Report(id, year, farms);
+              reportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
               errorPrompt(stage, "Report Creation", "Report generation error occured.");
@@ -281,8 +294,8 @@ public class ImportScene {
           }
           if (year != null) {
             try {
-              report = new Report(year, Main.farms);
-              ReportScene.setReport(report);
+              report = new Report(year, farms);
+              reportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
               errorPrompt(stage, "Report Creation", "Report generation error occured.");
@@ -301,8 +314,8 @@ public class ImportScene {
           }
           if (year != null && month != null) {
             try {
-              report = new Report(year, Main.farms);
-              ReportScene.setReport(report);
+              report = new Report(year, farms);
+              reportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
               errorPrompt(stage, "Report Creation", "Report generation error occured.");
@@ -322,56 +335,53 @@ public class ImportScene {
   /**
    * Sets the stage to the import scene
    */
-  public static void getStage(Stage stage, int width, int height, String title) {
-    createScene(stage);
-    stage.setTitle(title);
-    stage.setScene(new Scene(root, width, height));
-    stage.show();
+  public Scene getScene(int width, int height) {
     updateTable();
+    return new Scene(root, width, height);
   }
 
   // Private Helper Methods
 
   /**
-   * Adds a farm milk weight entry to the farm matching the id passed in the
-   * Main.farms list. If the farm does not already exist, it creates a farm and
-   * adds the milk weight entry to the new farm.
+   * Adds a farm milk weight entry to the farm matching the id passed in the farms
+   * list. If the farm does not already exist, it creates a farm and adds the milk
+   * weight entry to the new farm.
    * 
    * @param id     the id of the farm
    * @param date   the date being added
    * @param weight the weight being added
    */
-  private static void add(String id, LocalDate date, int weight) {
+  private void add(String id, LocalDate date, int weight) {
     // Create a new farm variable
     Farm farm = null;
-    // Look through the Main.farms array list, see if any farm object has the same
+    // Look through the farms array list, see if any farm object has the same
     // ID as the ID passed for the add function
-    for (Farm f : Main.farms)
+    for (Farm f : farms)
       // If the ID for the farm matches, set the farm variable to the farm in the list
       // (variable f)
       if (f.getID().equals(id))
         farm = f;
     // After the for loop, if the farm variable is still null (meaning no matches)
-    // create a new entry in the Main.farms array list
+    // create a new entry in the farms array list
     if (farm == null) {
       farm = new Farm(id);
-      Main.farms.add(farm);
+      farms.add(farm);
     }
-    // Insert the value into the correct farm in the Main.farms array list
+    // Insert the value into the correct farm in the farms array list
     farm.insert(date, weight);
   }
 
   /**
    * Removes a farm milk weight entry to the farm matching the id passed in the
-   * Main.farms list. If the farm or date entry doesn't exist, nothing occurs
+   * farms list. If the farm or date entry doesn't exist, nothing occurs
    * 
    * @param id   the id of the farm
    * @param date the date being removed
    */
-  private static void remove(String id, LocalDate date) {
-    // Look through the Main.farms array list, see if any farm object has the same
+  private void remove(String id, LocalDate date) {
+    // Look through the farms array list, see if any farm object has the same
     // ID as the ID passed for the remove function
-    for (Farm f : Main.farms)
+    for (Farm f : farms)
       // If the ID for the farm matches, remove the date key from the farm
       if (f.getID().equals(id))
         f.remove(date);
@@ -379,16 +389,16 @@ public class ImportScene {
 
   /**
    * Updates the main table on the scene with all the current values across all
-   * farm objects in the Main.farms array list
+   * farm objects in the farms array list
    */
-  private static void updateTable() {
+  private void updateTable() {
     farmRows.clear();
-    for (Farm farm : Main.farms)
+    for (Farm farm : farms)
       for (Entry<LocalDate, Integer> entry : farm.getSet())
         farmRows.add(new FarmRow(farm.getID(), entry.getKey(), entry.getValue()));
   }
 
-  private static String textPrompt(String name) {
+  private String textPrompt(String name) {
     TextInputDialog dialog = new TextInputDialog();
     dialog.setTitle("Enter " + name);
     dialog.setHeaderText("Enter " + name);
@@ -399,7 +409,7 @@ public class ImportScene {
     return null;
   }
 
-  private static void errorPrompt(Stage stage, String title, String message) {
+  private void errorPrompt(Stage stage, String title, String message) {
     Alert alert = new Alert(AlertType.ERROR);
     alert.setTitle(title + " Error");
     alert.setHeaderText(title + " Error");
