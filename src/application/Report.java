@@ -46,7 +46,7 @@ public class Report {
    * @param farmId the farm ID
    * @param year   the year for the farm
    * @throws InvalidReportException if the farm ID is null, if the farm ID doesn't
-   *                                exist or if the year is null
+   *                                exist, if the year is null, or farms list is null
    * @throws InvalidDateException
    */
   public Report(String farmId, int year, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
@@ -62,6 +62,9 @@ public class Report {
     }
     if (year <= 0) {
       throw new InvalidReportException("ERROR: Invalid Year");
+    }
+    if (farms == null) {
+    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
     // Adds farmId and Year to report
@@ -199,7 +202,7 @@ public class Report {
    * farm2 year total) ... ("farm103", farm103 year total) }
    * 
    * @param year the year for the report
-   * @throws InvalidReportException if the year is null
+   * @throws InvalidReportException if the year is null or list of farms is null
    * @throws InvalidDateException
    */
   public Report(int year, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
@@ -210,7 +213,9 @@ public class Report {
     if (year <= 0) {
       throw new InvalidReportException("ERROR: That year is invalid");
     }
-
+    if (farms == null) {
+    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+    }
     // adds year to report
     report.add(new Pair<>("Year", String.valueOf(year)));
 
@@ -297,7 +302,7 @@ public class Report {
    * 
    * @param year  the year for the report
    * @param month the month for the report
-   * @throws InvalidReportException if the year is null
+   * @throws InvalidReportException if the year is invalid, month is invalid, or farms is null
    * @throws InvalidDateException
    */
   public Report(int year, int month, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
@@ -307,6 +312,12 @@ public class Report {
 
     if (year <= 0) {
       throw new InvalidReportException("ERROR: Invalid Year");
+    }
+    if (month <=0 || month>=13) {
+    	throw new InvalidReportException("ERROR: Invalid Month");
+    }
+    if (farms == null) {
+    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
     // gets total milkweight produced by all farms for a given month and year
@@ -345,7 +356,7 @@ public class Report {
       double monthTotal3 = (double) monthTotal;
       double totalMonthWeight3 = (double) totalMonthWeight;
       double ratio = (monthTotal3 / totalMonthWeight3) * 100;
-      double percentage = Math.round(ratio * 100.0) * 100.0;
+      double percentage = Math.round(ratio * 100.0) / 100.0;
 
       // adds monthly percentage to report
       report.add(new Pair<>("Farm" + ID + " Percentage", String.valueOf(percentage) + "%"));
@@ -411,11 +422,21 @@ public class Report {
     type = "Date Range";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
+    
+    if (startDate == null) {
+    	throw new InvalidDateException("ERROR: Starting date is invalid");
+    }
+    if (endDate == null) {
+    	throw new InvalidDateException("ERROR: Ending date is invalid");
+    }
+    if (farms == null) {
+    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+    }
 
     // Formats a date into a string in the format "yyyy-mm-dd"
     DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-    String start = dateFormat.format(startDate);
-    String end = dateFormat.format(endDate);
+    String start = startDate.toString();
+    String end = endDate.toString();
 
     // adds the start and end date to report
     report.add(new Pair<>("Start Date", start));
@@ -425,9 +446,6 @@ public class Report {
     // specified date range
     int totalRangeWeight = weightOverRange(startDate, endDate, farms);
     
-    if (totalRangeWeight == 0) {
-    	totalRangeWeight = 1;
-    }
 
     // adds the total milkweight produced by all farms over a given
     // date range to report
