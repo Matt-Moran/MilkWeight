@@ -263,7 +263,7 @@ public class ImportScene {
           }
           if (id != null && year != null) {
             try {
-              report = new Report(id, year);
+              report = new Report(id, year, Main.farms);
               ReportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
@@ -281,7 +281,7 @@ public class ImportScene {
           }
           if (year != null) {
             try {
-              report = new Report(year);
+              report = new Report(year, Main.farms);
               ReportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
@@ -301,7 +301,7 @@ public class ImportScene {
           }
           if (year != null && month != null) {
             try {
-              report = new Report(year);
+              report = new Report(year, Main.farms);
               ReportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {

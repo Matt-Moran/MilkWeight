@@ -17,7 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.scene.chart.*;
@@ -85,7 +85,7 @@ public class ReportScene {
     root = new BorderPane();
 
     /*
-     * BorderPane Center (Displaying Report Text and New Report)
+     * BorderPane Center (Report Table)
      */
 
     // Create the three columns for each value
@@ -105,10 +105,6 @@ public class ReportScene {
       c.prefWidthProperty().bind(dataTable.widthProperty().divide(2));
       c.setSortable(false);
     }
-    // Create an VBox to store the Text and Return Button
-    VBox vbox = new VBox();
-    vbox.setSpacing(10);
-    vbox.setAlignment(Pos.CENTER);
 
     // Create new Report Button
     Button newReportButton = new Button("Create New Report");
@@ -119,18 +115,30 @@ public class ReportScene {
     // Create Export Report Button
     Button exportReportButton = new Button("Export Report");
 
-    // Add the elements to the VBox
-    vbox.getChildren().setAll(newReportButton, exportReportButton, pieChart);
-
-    // Set the VBox to the Left
+    // Set the VBox to the Center
     root.setCenter(dataTable);
+
+    /*
+     * BorderPane Top (Buttons)
+     */
+
+    // Create an VBox to store the Text and Return Button
+    HBox hbox = new HBox();
+    hbox.setSpacing(10);
+    hbox.setAlignment(Pos.CENTER_LEFT);
+
+    // Add the elements to the HBox
+    hbox.getChildren().setAll(newReportButton, exportReportButton);
+
+    // Display Buttons in Top
+    root.setTop(hbox);
 
     /*
      * BorderPane Right (Pie Graph)
      */
 
-    // Display Pie Chart in Center
-    root.setRight(vbox);
+    // Display Pie Chart in Right
+    root.setRight(pieChart);
   }
 
   /**
@@ -147,6 +155,9 @@ public class ReportScene {
     // Reset the Pie Chart and Text
     pieChart = new PieChart();
     pairRows = FXCollections.observableArrayList();
+
+    // Set the data for the table
+    dataTable.setItems(pairRows);
 
     // Set the title of the Pie Chart as the Report Type
     pieChart.setTitle(report.getType() + " Report");
@@ -166,6 +177,5 @@ public class ReportScene {
     // Set the text for the report details table
     for (Pair<String, String> pair : report.getReport())
       pairRows.add(new PairRow(pair.getKey(), pair.getValue()));
-    dataTable.setItems(pairRows);
   }
 }
