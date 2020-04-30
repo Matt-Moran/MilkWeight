@@ -25,8 +25,10 @@ public class Main extends Application {
 
   // Scene Variables
   private static Stage Stage;
-  private static ImportScene importScene;
-  private static ReportScene reportScene;
+  private static ImportScene importSceneManager;
+  private static ReportScene reportSceneManager;
+  private static Scene importScene;
+  private static Scene reportScene;
 
   /**
    * Starts the application GUI and manages application data
@@ -37,10 +39,14 @@ public class Main extends Application {
     Stage = stage;
 
     // Create the ReportScene
-    reportScene = new ReportScene();
+    reportSceneManager = new ReportScene();
 
     // Create the ImportScene
-    importScene = new ImportScene(stage, reportScene);
+    importSceneManager = new ImportScene(stage, reportSceneManager);
+
+    // Create the Report and Import Scenes
+    importScene = new Scene(importSceneManager.getScene(), WINDOW_WIDTH, WINDOW_HEIGHT);
+    reportScene = new Scene(reportSceneManager.getScene(), WINDOW_WIDTH, WINDOW_HEIGHT);
 
     // Start the application with the import scene
     Main.setStage("Import");
@@ -52,15 +58,13 @@ public class Main extends Application {
    * @param name the scene that is to be set
    */
   public static void setStage(String name) {
-    Scene scene;
     // If the scene is report, set to report
     if (name.equals("Report"))
-      scene = reportScene.getScene(WINDOW_WIDTH, WINDOW_HEIGHT);
+      Stage.setScene(reportScene);
     // If the scene not report, set to import
     else
-      scene = importScene.getScene(WINDOW_WIDTH, WINDOW_HEIGHT);
+      Stage.setScene(importScene);
     Stage.setTitle(APP_TITLE);
-    Stage.setScene(scene);
     Stage.show();
   }
 

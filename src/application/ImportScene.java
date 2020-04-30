@@ -19,7 +19,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -335,9 +334,8 @@ public class ImportScene {
   /**
    * Sets the stage to the import scene
    */
-  public Scene getScene(int width, int height) {
-    updateTable();
-    return new Scene(root, width, height);
+  public BorderPane getScene() {
+    return root;
   }
 
   // Private Helper Methods

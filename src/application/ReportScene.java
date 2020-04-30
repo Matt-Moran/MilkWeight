@@ -12,7 +12,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -154,8 +153,8 @@ public class ReportScene {
    * 
    * @return
    */
-  public Scene getScene(int width, int height) {
-    return new Scene(root, width, height);
+  public BorderPane getScene() {
+    return root;
   }
 
   public void setReport(Report report) {
@@ -174,9 +173,9 @@ public class ReportScene {
 
     // If there is more than 30 slices, remove the pie chart
     if (pieChart.getData().size() > 30)
-      pieChart.visibleProperty().setValue(false);
+      root.setRight(null);
     else
-      pieChart.visibleProperty().setValue(true);
+      root.setRight(pieChart);
 
     // Set the text for the report details table
     for (Pair<String, String> pair : report.getReport())
