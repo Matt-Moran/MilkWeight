@@ -22,8 +22,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
@@ -35,6 +37,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 /**
  * The scene used for importing data and confirming data before reports are
@@ -313,7 +316,7 @@ public class ImportScene {
           }
           if (year != null && month != null) {
             try {
-              report = new Report(year, farms);
+              report = new Report(year, month, farms);
               reportScene.setReport(report);
               Main.setStage("Report");
             } catch (InvalidReportException | InvalidDateException error) {
@@ -323,7 +326,21 @@ public class ImportScene {
             errorPrompt(stage, "Report Creation", "Invalid year input.");
           }
         } else if (comboBox.getValue().equals("Date Range")) {
-          Main.setStage("Report");
+          LocalDate start, end;
+          start = datePrompt("Select start date for range.");
+          end = datePrompt("Select end date for range.");
+          if (start != null && end != null) {
+            try {
+              report = new Report(start, end, farms);
+              reportScene.setReport(report);
+              Main.setStage("Report");
+            } catch (InvalidReportException | InvalidDateException error) {
+              errorPrompt(stage, "Report Creation", "Report generation error occured.");
+            }
+          }
+          else {
+            errorPrompt(stage, "Report Creation", "Invalid date input.");
+          }
         }
       } else {
         errorPrompt(stage, "Report Selection", "Select a report type before generating a report.");
@@ -403,6 +420,27 @@ public class ImportScene {
     Optional<String> result = dialog.showAndWait();
     if (result.isPresent()) {
       return result.get();
+    }
+    return null;
+  }
+  
+  private LocalDate datePrompt(String header) {
+ // Create the custom dialog.
+    Dialog<Pair<String, String>> dialog = new Dialog<>();
+    dialog.setTitle("Enter Date");
+    dialog.setHeaderText(header);
+
+    // Set the button types.
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    DatePicker datePicker = new DatePicker();
+
+    dialog.getDialogPane().setContent(datePicker);
+
+    Optional<Pair<String, String>> result = dialog.showAndWait();
+
+    if (result.isPresent()) {
+      return datePicker.getValue();
     }
     return null;
   }

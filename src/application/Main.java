@@ -21,7 +21,7 @@ public class Main extends Application {
   // Global Variables
   private static final int WINDOW_WIDTH = 1280;
   private static final int WINDOW_HEIGHT = 720;
-  private static final String APP_TITLE = "MilkWeight";
+  private static final String APP_TITLE = "Milk Weight";
 
   // Scene Variables
   private static Stage Stage;
@@ -39,7 +39,7 @@ public class Main extends Application {
     Stage = stage;
 
     // Create the ReportScene
-    reportSceneManager = new ReportScene();
+    reportSceneManager = new ReportScene(stage);
 
     // Create the ImportScene
     importSceneManager = new ImportScene(stage, reportSceneManager);

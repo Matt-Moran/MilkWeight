@@ -7,16 +7,24 @@
 
 package application;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.scene.chart.*;
 import javafx.scene.chart.PieChart.Data;
@@ -71,7 +79,10 @@ public class ReportScene {
   // Create the TableView for each column
   private TableView<PairRow> dataTable;
 
-  public ReportScene() {
+  // Export String
+  private String export;
+
+  public ReportScene(Stage stage) {
     /*
      * Initialization (Creating the Scene Base)
      */
@@ -87,6 +98,9 @@ public class ReportScene {
 
     // Create Observable List
     pairRows = FXCollections.observableArrayList();
+
+    // Create Export String
+    export = new String();
 
     /*
      * BorderPane Center (Report Table)
@@ -112,9 +126,6 @@ public class ReportScene {
 
     // Create new Report Button
     Button newReportButton = new Button("Create New Report");
-    newReportButton.setOnAction(e -> {
-      Main.setStage("Import");
-    });
 
     // Create Export Report Button
     Button exportReportButton = new Button("Export Report");
@@ -131,14 +142,14 @@ public class ReportScene {
 
     // Create an VBox to store the Text and Return Button
     HBox hbox = new HBox();
-    hbox.setSpacing(10);
-    hbox.setAlignment(Pos.CENTER_LEFT);
+    hbox.setSpacing(20);
+    hbox.setAlignment(Pos.CENTER);
 
     // Add the elements to the HBox
     hbox.getChildren().setAll(newReportButton, exportReportButton);
 
     // Display Buttons in Top
-    root.setTop(hbox);
+    root.setBottom(hbox);
 
     /*
      * BorderPane Right (Pie Graph)
@@ -146,6 +157,47 @@ public class ReportScene {
 
     // Display Pie Chart in Right
     root.setRight(pieChart);
+
+    /*
+     * Events for Buttons
+     */
+
+    // New Report button
+    newReportButton.setOnAction(e -> {
+      Main.setStage("Import");
+    });
+
+    // Export Report button
+    exportReportButton.setOnAction(e -> {
+      // Create a file chooser pop-up
+      FileChooser fileChooser = new FileChooser();
+
+      // Set extension filter to txt only
+      FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+      fileChooser.getExtensionFilters().add(extFilter);
+
+      // Show save file dialog built in system
+      File file = fileChooser.showSaveDialog(stage);
+
+      if (file != null) {
+        try {
+          FileWriter fileWriter = new FileWriter(file);
+          fileWriter.write(export);
+          fileWriter.close();
+        } catch (IOException ex) {
+          errorPrompt(stage, "Export", "Failed to export file to system.");
+        }
+      }
+    });
+
+  }
+
+  private void errorPrompt(Stage stage, String title, String message) {
+    Alert alert = new Alert(AlertType.ERROR);
+    alert.setTitle(title + " Error");
+    alert.setHeaderText(title + " Error");
+    alert.setContentText(message);
+    alert.showAndWait();
   }
 
   /**
@@ -161,7 +213,7 @@ public class ReportScene {
     // Reset the table and pie chart
     pairRows.clear();
     pieChart.getData().clear();
-    
+
     // Set the title of the Pie Chart as the Report Type
     pieChart.setTitle(report.getType() + " Report");
 
@@ -172,13 +224,19 @@ public class ReportScene {
     }
 
     // If there is more than 30 slices, remove the pie chart
-    if (pieChart.getData().size() > 30)
+    if (pieChart.getData().size() > 30 || pieChart.getData().isEmpty())
       root.setRight(null);
     else
       root.setRight(pieChart);
 
-    // Set the text for the report details table
+    // Set the text for the report details table (application)
     for (Pair<String, String> pair : report.getReport())
       pairRows.add(new PairRow(pair.getKey(), pair.getValue()));
+
+    // Set the text for the report to the export string (export)
+    export = report.getType() + " Report\n\n";
+
+    for (Pair<String, String> pair : report.getReport())
+      export = export.concat(pair.getKey() + ": " + pair.getValue() + "\n");
   }
 }
