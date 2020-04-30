@@ -1,4 +1,4 @@
-/**
+/*
  * Assignment Name:   MilkWeight
  * Filename:          Main.Java
  * Authors:           ATEAM050

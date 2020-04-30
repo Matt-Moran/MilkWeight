@@ -1,3 +1,10 @@
+/*
+ * Assignment Name:   MilkWeight
+ * Filename:          Import.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
 import java.io.File;
@@ -13,13 +20,17 @@ import java.util.stream.Stream;
 /**
  * Import method parses the file and adds its contents to the farms array list.
  * 
- * @author ATEAM 050
+ * @author ATEAM050
  *
  */
 public class Import {
 
   private ArrayList<Farm> farms;
 
+  /**
+   * Assigns the arraylist to input data into
+   * @param farms
+   */
   public Import(ArrayList<Farm> farms) {
     this.farms = farms;
   }

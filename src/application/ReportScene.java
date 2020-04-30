@@ -1,4 +1,4 @@
-/**
+/*
  * Assignment Name:   MilkWeight
  * Filename:          ReportScene.Java
  * Authors:           ATEAM050
@@ -36,36 +36,70 @@ import javafx.scene.chart.PieChart.Data;
  */
 public class ReportScene {
 
-//Pair Table Row Inner-Class
+  /**
+   * Pair Table Row Inner-Class
+   * 
+   * @author ATEAM050
+   *
+   */
   public class PairRow {
+    // Variables
     public StringProperty key;
     public StringProperty value;
 
+    /**
+     * Create the row entry
+     * 
+     * @param key   the key
+     * @param value the value
+     */
     public PairRow(String key, String value) {
       setKey(key);
       setValue(value);
     }
 
+    /**
+     * Set the key
+     * 
+     * @param value the key
+     */
     public void setKey(String value) {
       keyProperty().set(value);
     }
 
+    /**
+     * Set the value
+     * 
+     * @param value the value
+     */
     public void setValue(String value) {
       valueProperty().set(value);
     }
 
+    /**
+     * Returns the key simple string
+     * 
+     * @return the key simple string
+     */
     public StringProperty keyProperty() {
       if (key == null)
         key = new SimpleStringProperty(this, "key");
       return key;
     }
 
+    /**
+     * Returns the value simple stirng
+     * 
+     * @return the value simple string
+     */
     public StringProperty valueProperty() {
       if (value == null)
         value = new SimpleStringProperty(this, "value");
       return value;
     }
   }
+
+  // Variables
 
   // Array list of Row objects
   private ObservableList<PairRow> pairRows;
@@ -82,7 +116,13 @@ public class ReportScene {
   // Export String
   private String export;
 
+  /**
+   * Creates the elements in the report scene
+   * 
+   * @param stage the main stage
+   */
   public ReportScene(Stage stage) {
+
     /*
      * Initialization (Creating the Scene Base)
      */
@@ -124,12 +164,6 @@ public class ReportScene {
       c.setSortable(false);
     }
 
-    // Create new Report Button
-    Button newReportButton = new Button("Create New Report");
-
-    // Create Export Report Button
-    Button exportReportButton = new Button("Export Report");
-
     // Set the VBox to the Center
     root.setCenter(dataTable);
 
@@ -137,8 +171,15 @@ public class ReportScene {
     dataTable.setItems(pairRows);
 
     /*
-     * BorderPane Top (Buttons)
+     * BorderPane Bottom (Buttons)
+     * 
      */
+
+    // Create new Report Button
+    Button newReportButton = new Button("Create New Report");
+
+    // Create Export Report Button
+    Button exportReportButton = new Button("Export Report");
 
     // Create an VBox to store the Text and Return Button
     HBox hbox = new HBox();
@@ -192,6 +233,13 @@ public class ReportScene {
 
   }
 
+  /**
+   * Create a error message prompt
+   * 
+   * @param stage   the main stage
+   * @param title   the title of the prompt
+   * @param message the error message for the prompt
+   */
   private void errorPrompt(Stage stage, String title, String message) {
     Alert alert = new Alert(AlertType.ERROR);
     alert.setTitle(title + " Error");
@@ -209,6 +257,11 @@ public class ReportScene {
     return root;
   }
 
+  /**
+   * Sets the elements in the scene to reflect the current report's content
+   * 
+   * @param report
+   */
   public void setReport(Report report) {
     // Reset the table and pie chart
     pairRows.clear();

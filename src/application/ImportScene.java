@@ -1,4 +1,4 @@
-/**
+/*
  * Assignment Name:   MilkWeight
  * Filename:          ImportScene.Java
  * Authors:           ATEAM050
@@ -47,42 +47,85 @@ import javafx.util.Pair;
  */
 public class ImportScene {
 
-  // Farm Table Row Inner-Class
+  /**
+   * Farm Table Row Inner-Class
+   * 
+   * @author ATEAM050
+   */
   public class FarmRow {
+
+    // Each row type
     public StringProperty farm;
     public StringProperty date;
     public StringProperty weight;
 
+    /**
+     * Declare the row types
+     * 
+     * @param farm   farm id
+     * @param date   date
+     * @param weight weight
+     */
     public FarmRow(String farm, LocalDate date, int weight) {
       setFarm(farm);
       setDate(date.toString());
       setWeight(String.valueOf(weight));
     }
 
+    /**
+     * Set the farm id
+     * 
+     * @param value farm id
+     */
     public void setFarm(String value) {
       farmProperty().set(value);
     }
 
+    /**
+     * Set the date
+     * 
+     * @param value date
+     */
     public void setDate(String value) {
       dateProperty().set(value);
     }
 
+    /**
+     * Set the weight
+     * 
+     * @param value weight
+     */
     public void setWeight(String value) {
       weightProperty().set(value);
     }
 
+    /**
+     * Returns the farm id simple string
+     * 
+     * @return the farm id simple string
+     */
     public StringProperty farmProperty() {
       if (farm == null)
         farm = new SimpleStringProperty(this, "farm");
       return farm;
     }
 
+    /**
+     * Returns the date simple string
+     * 
+     * @return the date simple string
+     */
     public StringProperty dateProperty() {
       if (date == null)
         date = new SimpleStringProperty(this, "date");
       return date;
     }
 
+    /**
+     * Returns the weight simple string
+     * 
+     * @return the weight simple string
+     */
     public StringProperty weightProperty() {
       if (weight == null)
         weight = new SimpleStringProperty(this, "weight");
@@ -94,16 +137,27 @@ public class ImportScene {
 
   // Array list of Farm objects
   private ArrayList<Farm> farms;
+
   // Array list of Row objects
   private ObservableList<FarmRow> farmRows;
+
   // Main Pane containing the scene's content
   private BorderPane root;
+
   // Import object for running imports
   Import imp;
-// Report Scene for sending report results
+
+  // Report Scene for sending report results
   ReportScene reportScene;
 
+  /**
+   * Creates the import scene elements
+   * 
+   * @param stage       the main stage
+   * @param reportScene the report scene
+   */
   public ImportScene(Stage stage, ReportScene reportScene) {
+
     /*
      * Initialization (Creating the Scene Base)
      */
@@ -268,6 +322,7 @@ public class ImportScene {
     generateButton.setOnAction(e -> {
       Report report;
       if (!comboBox.getSelectionModel().isEmpty()) {
+        // Farm Report
         if (comboBox.getValue().equals("Farm")) {
           String id = textPrompt("Farm ID");
           Integer year;
@@ -287,6 +342,7 @@ public class ImportScene {
           } else {
             errorPrompt(stage, "Report Creation", "Invalid farm ID and year inputs.");
           }
+          // Annual Report
         } else if (comboBox.getValue().equals("Annual")) {
           Integer year;
           try {
@@ -305,6 +361,7 @@ public class ImportScene {
           } else {
             errorPrompt(stage, "Report Creation", "Invalid year input.");
           }
+          // Monthly Report
         } else if (comboBox.getValue().equals("Monthly")) {
           Integer year, month;
           try {
@@ -325,6 +382,7 @@ public class ImportScene {
           } else {
             errorPrompt(stage, "Report Creation", "Invalid year input.");
           }
+          // Date Range Report
         } else if (comboBox.getValue().equals("Date Range")) {
           LocalDate start, end;
           start = datePrompt("Select start date for range.");
@@ -337,8 +395,7 @@ public class ImportScene {
             } catch (InvalidReportException | InvalidDateException error) {
               errorPrompt(stage, "Report Creation", "Report generation error occured.");
             }
-          }
-          else {
+          } else {
             errorPrompt(stage, "Report Creation", "Invalid date input.");
           }
         }
@@ -413,6 +470,12 @@ public class ImportScene {
         farmRows.add(new FarmRow(farm.getID(), entry.getKey(), entry.getValue()));
   }
 
+  /**
+   * Creates a dialog text prompt
+   * 
+   * @param name of the prompt
+   * @return the string from the prompt
+   */
   private String textPrompt(String name) {
     TextInputDialog dialog = new TextInputDialog();
     dialog.setTitle("Enter " + name);
@@ -423,9 +486,15 @@ public class ImportScene {
     }
     return null;
   }
-  
+
+  /**
+   * Creates a dialog date picker prompt
+   * 
+   * @param header the title of the prompt
+   * @return the date from the prompt
+   */
   private LocalDate datePrompt(String header) {
- // Create the custom dialog.
+    // Create the custom dialog.
     Dialog<Pair<String, String>> dialog = new Dialog<>();
     dialog.setTitle("Enter Date");
     dialog.setHeaderText(header);
@@ -445,6 +514,13 @@ public class ImportScene {
     return null;
   }
 
+  /**
+   * Create a error message prompt
+   * 
+   * @param stage   the main stage
+   * @param title   the title of the prompt
+   * @param message the error message for the prompt
+   */
   private void errorPrompt(Stage stage, String title, String message) {
     Alert alert = new Alert(AlertType.ERROR);
     alert.setTitle(title + " Error");

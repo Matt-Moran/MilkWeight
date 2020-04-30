@@ -1,3 +1,10 @@
+/*
+ * Assignment Name:   MilkWeight
+ * Filename:          ReportTest.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package tests;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -14,6 +21,11 @@ import application.InvalidReportException;
 import application.Report;
 import javafx.util.Pair;
 
+/**
+ * Report.java JUnit Tests
+ * 
+ * @author ATEAM050
+ */
 public class ReportTest {
 
   private ArrayList<Farm> testFarms;

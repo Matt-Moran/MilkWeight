@@ -1,7 +1,19 @@
+/*
+ * Assignment Name:   MilkWeight
+ * Filename:          FarmADT.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
 import java.time.LocalDate;
 
+/**
+ * Farm data structure interface
+ * 
+ * @author ATEAM050
+ */
 public interface FarmADT {
   /**
    * Receives the data structures unique ID

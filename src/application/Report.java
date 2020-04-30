@@ -1,3 +1,10 @@
+/*
+ * Assignment Name:   MilkWeight
+ * Filename:          Report.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
 import java.time.LocalDate;
@@ -5,16 +12,19 @@ import java.util.ArrayList;
 
 import javafx.util.Pair;
 
+/**
+ * The report generation tool
+ * 
+ * @author ATEAM050
+ */
 public class Report {
-
-  // USE DATA FROM THE Main.java ArrayList<Farm> farms (READ ONLY)
 
   /*
    * Helps store the import information for the report. (Key: (value) == (String
    * key, String value))
    */
   private ArrayList<Pair<String, String>> report;
-  
+
   // Stores the name of the report generated
   private String type;
 
@@ -44,7 +54,8 @@ public class Report {
    * @param farmId the farm ID
    * @param year   the year for the farm
    * @throws InvalidReportException if the farm ID is null, if the farm ID doesn't
-   *                                exist, if the year is null, or farms list is null
+   *                                exist, if the year is null, or farms list is
+   *                                null
    * @throws InvalidDateException
    */
   public Report(String farmId, int year, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
@@ -62,7 +73,7 @@ public class Report {
       throw new InvalidReportException("ERROR: Invalid Year");
     }
     if (farms == null) {
-    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+      throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
     // Adds farmId and Year to report
@@ -71,7 +82,7 @@ public class Report {
 
     // total milkweight produced by all farms for a given year
     int totalYearWeight = getTotalWeightOfYear(year, farms);
-    
+
     // total milkweight produced by given farm for given year
     int farmYearWeight = findFarm(farmId, farms).get(year);
     // adds the total weight produced by the farm to the report
@@ -82,7 +93,7 @@ public class Report {
     // note: Casts year weights into doubles to do percentage calculation
     double totalYearWeight2 = (double) totalYearWeight;
     double farmYearWeight2 = (double) farmYearWeight;
-    
+
     double yearRatio = (farmYearWeight2 / totalYearWeight2) * 100;
     double yearPercentage = Math.round(yearRatio * 100.0) / 100.0;
 
@@ -108,7 +119,7 @@ public class Report {
       Farm farm = findFarm(farmId, farms);
       // gets farm weight produced by farm for the month
       int farmMonthWeight = farm.get(i, year);
-      
+
       // to prevent divide by zero, set the total weight to 1 if it is zero
       if (totalMonthWeight == 0)
         totalMonthWeight = 1;
@@ -118,7 +129,7 @@ public class Report {
       // Note: casts weights into double to do percentage calculation
       double farmMonthWeight2 = (double) farmMonthWeight;
       double totalMonthWeight2 = (double) totalMonthWeight;
-      
+
       double ratio = (farmMonthWeight2 / totalMonthWeight2) * 100;
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
@@ -212,7 +223,7 @@ public class Report {
       throw new InvalidReportException("ERROR: That year is invalid");
     }
     if (farms == null) {
-    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+      throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
     // adds year to report
     report.add(new Pair<>("Year", String.valueOf(year)));
@@ -251,7 +262,7 @@ public class Report {
       // compared to all farms
       double farmTotal3 = (double) farmTotal;
       double yearWeight3 = (double) yearWeight;
-     
+
       double ratio = (farmTotal3 / yearWeight3) * 100;
       double percentage = Math.round(ratio * 100.0) / 100.0;
 
@@ -300,7 +311,8 @@ public class Report {
    * 
    * @param year  the year for the report
    * @param month the month for the report
-   * @throws InvalidReportException if the year is invalid, month is invalid, or farms is null
+   * @throws InvalidReportException if the year is invalid, month is invalid, or
+   *                                farms is null
    * @throws InvalidDateException
    */
   public Report(int year, int month, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
@@ -311,11 +323,11 @@ public class Report {
     if (year <= 0) {
       throw new InvalidReportException("ERROR: Invalid Year");
     }
-    if (month <=0 || month>=13) {
-    	throw new InvalidReportException("ERROR: Invalid Month");
+    if (month <= 0 || month >= 13) {
+      throw new InvalidReportException("ERROR: Invalid Month");
     }
     if (farms == null) {
-    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+      throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
     // gets total milkweight produced by all farms for a given month and year
@@ -416,19 +428,20 @@ public class Report {
    * @throws InvalidReportException if the year is null
    * @throws InvalidDateException
    */
-  public Report(LocalDate startDate, LocalDate endDate, ArrayList<Farm> farms) throws InvalidReportException, InvalidDateException {
+  public Report(LocalDate startDate, LocalDate endDate, ArrayList<Farm> farms)
+      throws InvalidReportException, InvalidDateException {
     type = "Date Range";
     report = new ArrayList<Pair<String, String>>();
     pieGraph = new ArrayList<Pair<String, Integer>>();
-    
+
     if (startDate == null) {
-    	throw new InvalidDateException("ERROR: Starting date is invalid");
+      throw new InvalidDateException("ERROR: Starting date is invalid");
     }
     if (endDate == null) {
-    	throw new InvalidDateException("ERROR: Ending date is invalid");
+      throw new InvalidDateException("ERROR: Ending date is invalid");
     }
     if (farms == null) {
-    	throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
+      throw new InvalidReportException("ERROR: Could not access valid list of farms for report");
     }
 
     String start = startDate.toString();
@@ -441,7 +454,6 @@ public class Report {
     // calculates the total weight produced by all farms over the
     // specified date range
     int totalRangeWeight = weightOverRange(startDate, endDate, farms);
-    
 
     // adds the total milkweight produced by all farms over a given
     // date range to report
@@ -513,7 +525,7 @@ public class Report {
   public ArrayList<Pair<String, Integer>> getPieGraph() {
     return pieGraph;
   }
-  
+
   /**
    * Returns the type of report
    * 

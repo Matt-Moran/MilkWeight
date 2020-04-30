@@ -1,3 +1,10 @@
+/*
+ * Assignment Name:   MilkWeight
+ * Filename:          Farm.Java
+ * Authors:           ATEAM050
+ * Known Bugs:        None
+ */
+
 package application;
 
 import java.time.LocalDate;
@@ -6,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
+ * Farm data structure
  * 
  * @author ATEAM050
  */
@@ -17,6 +25,11 @@ public class Farm implements FarmADT {
   // The id associated with the farm
   private String id;
 
+  /**
+   * Constructor for a new farm with a unique ID
+   * 
+   * @param id the unique farm string ID
+   */
   public Farm(String id) {
     // Initialize the farm with a string ID and a LocalDate (date) and Integer
     // (weight) hash map
@@ -32,9 +45,10 @@ public class Farm implements FarmADT {
   public String getID() {
     return id;
   }
-  
+
   /**
    * Get a list of all current date and weight entries for the farm
+   * 
    * @return a set of date and weight entries for the farm
    */
   public Set<Entry<LocalDate, Integer>> getSet() {
